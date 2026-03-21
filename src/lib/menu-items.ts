@@ -30,8 +30,12 @@ export const MENU_ITEMS: MenuItem[] = [
 		label: "BARRACKS",
 		action: { type: "route", path: "/barracks" },
 	},
+	{
+		label: "CHANGELOG",
+		action: { type: "route", path: "/changelog" },
+	},
 ]
 
 export const STEAM_PROFILE_URL = "https://steamcommunity.com/id/Smyile/"
 
-export const SITE_VERSION = "0.2.0"
+export const SITE_VERSION = "0.3.0"

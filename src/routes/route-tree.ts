@@ -1,7 +1,6 @@
 import { createRootRoute, createRoute } from "@tanstack/react-router"
 import { AboutScreen } from "../components/about-screen"
 import { BarracksScreen } from "../components/barracks-screen"
-import { ChangelogScreen } from "../components/changelog-screen"
 import { LobbyScreen } from "../components/lobby-screen"
 import { MW2Layout } from "../components/mw2-layout"
 
@@ -27,10 +26,4 @@ const barracksRoute = createRoute({
 	component: BarracksScreen,
 })
 
-const changelogRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/changelog",
-	component: ChangelogScreen,
-})
-
-export const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, barracksRoute, changelogRoute])
+export const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, barracksRoute])

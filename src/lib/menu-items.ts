@@ -4,9 +4,7 @@ export type MenuItem = {
 	action: MenuAction
 }
 
-export type MenuAction =
-	| { type: "link"; url: string }
-	| { type: "route"; path: string }
+export type MenuAction = { type: "link"; url: string } | { type: "route"; path: string }
 
 export const MENU_ITEMS: MenuItem[] = [
 	{
@@ -32,7 +30,7 @@ export const MENU_ITEMS: MenuItem[] = [
 	},
 	{
 		label: "CHANGELOG",
-		action: { type: "route", path: "/changelog" },
+		action: { type: "link", url: "https://github.com/davidetacchini/smyile/releases" },
 	},
 	{
 		label: "WEBSITE",

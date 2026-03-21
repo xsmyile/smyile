@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+	--font-michroma: "Michroma", sans-serif;
+	--font-barlow: "Barlow Condensed", sans-serif;
+
+	--color-mw2-bg: #2a2a2a;
+	--color-mw2-smoke: #3d3d3d;
+	--color-mw2-text: #e8e4d4;
+	--color-mw2-text-dim: #9a9686;
+	--color-mw2-highlight: #ffffff;
+	--color-mw2-player-name: #d4a843;
+	--color-mw2-new-badge: #4caf50;
+	--color-mw2-hotkey: #c9a84c;
+	--color-mw2-separator: #5a5a5a;
+	--color-mw2-card-bg: #3a3a3a99;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	background-color: var(--color-mw2-bg);
+	color: var(--color-mw2-text);
+	font-family: var(--font-barlow);
+	cursor: default;
+	user-select: none;
+}
+
+@keyframes smoke-drift {
+	0% {
+		transform: translateX(0) translateY(0) scale(1);
+		opacity: 0.3;
+	}
+	50% {
+		transform: translateX(-30px) translateY(-20px) scale(1.1);
+		opacity: 0.5;
+	}
+	100% {
+		transform: translateX(0) translateY(0) scale(1);
+		opacity: 0.3;
+	}
+}
+
+@keyframes smoke-drift-alt {
+	0% {
+		transform: translateX(0) translateY(0) scale(1.05);
+		opacity: 0.2;
+	}
+	50% {
+		transform: translateX(40px) translateY(-15px) scale(1);
+		opacity: 0.4;
+	}
+	100% {
+		transform: translateX(0) translateY(0) scale(1.05);
+		opacity: 0.2;
+	}
+}

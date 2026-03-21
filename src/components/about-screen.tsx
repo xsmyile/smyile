@@ -18,19 +18,9 @@ export function AboutScreen() {
 				ABOUT
 			</h1>
 
-			<div className="flex max-w-xl flex-col gap-6 font-barlow text-lg leading-relaxed tracking-wide text-mw2-text">
-				<p>
-					Hey, I&apos;m <span className="font-semibold text-mw2-player-name">Davide</span> — a
-					developer who builds things for fun and for real.
-				</p>
-				<p>
-					This site is a replica of the MW2 lobby UI, built as a personal hub. If you grew up
-					staring at this screen waiting for a match, you know the vibe.
-				</p>
-				<p className="text-mw2-text-dim">
-					Built with React, TypeScript, Tailwind, and too much nostalgia.
-				</p>
-			</div>
+			<p className="max-w-xl font-barlow text-lg leading-relaxed tracking-wide text-mw2-text">
+				MW2 lobby replica turned personal hub. If you know, you know.
+			</p>
 		</PageLayout>
 	)
 }

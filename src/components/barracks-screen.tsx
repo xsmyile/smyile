@@ -10,12 +10,12 @@ const PROJECTS = [
 	},
 	{
 		name: "MIZU",
-		url: "https://mizu.davidet.com",
+		url: "https://github.com/mizu-systems/mizu-web",
 		description: "Water tracking app",
 	},
 	{
 		name: "SMYILE",
-		url: "https://github.com/davidetacchini",
+		url: "https://github.com/davidetacchini/smyile",
 		description: "This site — MW2 lobby UI replica",
 	},
 ]

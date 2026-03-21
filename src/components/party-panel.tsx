@@ -10,7 +10,7 @@ export function PartyPanel() {
 	const isVisible = usePageVisibility()
 
 	const playerCount = isVisible ? 2 : 1
-	const visitorName = `[VIS] ${visitorId}`
+	const visitorName = `[YOU] ${visitorId}`
 
 	return (
 		<div className="flex w-full flex-col gap-1.5">
@@ -19,7 +19,7 @@ export function PartyPanel() {
 				<span className="font-semibold text-mw2-highlight">Smyile</span>&apos;s party.
 			</p>
 
-			<PlayerBar name="Smyile" level={SMYILE_LEVEL} highlight />
+			<PlayerBar name="Smyile" level={SMYILE_LEVEL} />
 
 			<AnimatePresence>
 				{isVisible && (
@@ -30,7 +30,7 @@ export function PartyPanel() {
 						transition={{ duration: 0.3, ease: "easeInOut" }}
 						className="overflow-hidden"
 					>
-						<PlayerBar name={visitorName} level={visitorLevel} />
+						<PlayerBar name={visitorName} level={visitorLevel} highlight />
 					</motion.div>
 				)}
 			</AnimatePresence>
@@ -50,7 +50,7 @@ type PlayerBarProps = {
 
 function PlayerBar({ name, level, highlight }: PlayerBarProps) {
 	return (
-		<div className="flex w-full items-center justify-between border-t border-mw2-separator/60 bg-mw2-card-bg px-4 py-2.5">
+		<div className="flex w-full items-center justify-between bg-mw2-card-bg/80 px-4 py-2">
 			<span
 				className={`font-michroma text-base tracking-wide ${highlight ? "text-mw2-player-name" : "text-mw2-text"}`}
 			>

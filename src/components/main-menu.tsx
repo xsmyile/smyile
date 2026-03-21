@@ -1,13 +1,11 @@
-import { AnimatePresence, motion } from "framer-motion"
 import type { MenuItem } from "../lib/menu-items"
 
 type Props = {
 	items: MenuItem[]
-	activeSubmenu: string | null
 	onItemClick: (item: MenuItem) => void
 }
 
-export function MainMenu({ items, activeSubmenu, onItemClick }: Props) {
+export function MainMenu({ items, onItemClick }: Props) {
 	return (
 		<nav className="flex flex-col items-end gap-0.5">
 			{items.map((item) => (
@@ -26,32 +24,6 @@ export function MainMenu({ items, activeSubmenu, onItemClick }: Props) {
 							</span>
 						)}
 					</button>
-
-					<AnimatePresence>
-						{item.action.type === "submenu" && activeSubmenu === item.label && (
-							<motion.div
-								initial={{ height: 0, opacity: 0 }}
-								animate={{ height: "auto", opacity: 1 }}
-								exit={{ height: 0, opacity: 0 }}
-								transition={{ duration: 0.2, ease: "easeInOut" }}
-								className="overflow-hidden"
-							>
-								<div className="flex flex-col items-end gap-1 border-r border-mw2-separator py-2 pr-4">
-									{item.action.items.map((sub) => (
-										<a
-											key={sub.label}
-											href={sub.url}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="font-barlow text-base tracking-wider text-mw2-text-dim transition-colors hover:text-mw2-highlight"
-										>
-											{sub.label}
-										</a>
-									))}
-								</div>
-							</motion.div>
-						)}
-					</AnimatePresence>
 				</div>
 			))}
 		</nav>

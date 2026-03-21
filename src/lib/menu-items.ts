@@ -1,56 +1,37 @@
 export type MenuItem = {
 	label: string
-	badge?: "new" | null
+	badge?: "new"
 	action: MenuAction
 }
 
 export type MenuAction =
 	| { type: "link"; url: string }
 	| { type: "route"; path: string }
-	| { type: "submenu"; items: SubMenuItem[] }
-
-export type SubMenuItem = {
-	label: string
-	url: string
-	icon?: string
-}
 
 export const MENU_ITEMS: MenuItem[] = [
 	{
 		label: "FIND GAME",
-		action: {
-			type: "submenu",
-			items: [
-				{ label: "DISCORD", url: "https://discord.gg/" },
-				{ label: "GITHUB", url: "https://github.com/Sitido" },
-				{ label: "STEAM", url: "https://steamcommunity.com/id/Smyile/" },
-			],
-		},
+		action: { type: "link", url: "https://github.com/davidetacchini" },
 	},
 	{
 		label: "ABOUT",
-		action: { type: "route", path: "/" },
+		action: { type: "route", path: "/about" },
 	},
 	{
 		label: "OVERBOT",
-		badge: "new",
-		action: { type: "link", url: "https://github.com/Sitido" },
+		action: { type: "link", url: "https://overbot.net" },
 	},
 	{
 		label: "MIZU",
 		badge: "new",
-		action: { type: "link", url: "https://github.com/Sitido" },
+		action: { type: "link", url: "https://mizu.davidet.com" },
 	},
 	{
 		label: "BARRACKS",
-		action: { type: "route", path: "/" },
-	},
-	{
-		label: "INVITE",
-		action: { type: "link", url: "https://discord.gg/" },
+		action: { type: "route", path: "/barracks" },
 	},
 ]
 
 export const STEAM_PROFILE_URL = "https://steamcommunity.com/id/Smyile/"
 
-export const SITE_VERSION = "0.1.0"
+export const SITE_VERSION = "0.2.0"

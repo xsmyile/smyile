@@ -33,7 +33,12 @@ export function getVisitorId(): string {
 }
 
 export function getVisitorLevel(): number {
+	const stored = sessionStorage.getItem("mw2-visitor-level")
+	if (stored) return Number(stored)
+
 	const fingerprint = getFingerprint()
 	const hash = hashCode(fingerprint + "level-salt")
-	return (hash % 70) + 1
+	const level = (hash % 70) + 1
+	sessionStorage.setItem("mw2-visitor-level", String(level))
+	return level
 }

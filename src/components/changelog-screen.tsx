@@ -4,6 +4,15 @@ import { PageLayout } from "./page-layout"
 
 const CHANGELOG = [
 	{
+		version: "0.4.0",
+		changes: [
+			"Add favicon and icons from custom logo",
+			"Add SEO meta tags, Open Graph, and Twitter cards",
+			"Add web app manifest",
+			"Add website link to menu",
+		],
+	},
+	{
 		version: "0.3.0",
 		changes: [
 			"Add changelog screen and menu entry",

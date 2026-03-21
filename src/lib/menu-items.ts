@@ -34,8 +34,12 @@ export const MENU_ITEMS: MenuItem[] = [
 		label: "CHANGELOG",
 		action: { type: "route", path: "/changelog" },
 	},
+	{
+		label: "WEBSITE",
+		action: { type: "link", url: "https://davidet.com" },
+	},
 ]
 
 export const STEAM_PROFILE_URL = "https://steamcommunity.com/id/Smyile/"
 
-export const SITE_VERSION = "0.3.0"
+export const SITE_VERSION = "0.4.0"

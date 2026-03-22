@@ -32,9 +32,7 @@ export function BarracksScreen() {
 
 	return (
 		<PageLayout backHint>
-			<h1 className="mb-8 font-michroma text-[2rem] tracking-wider text-mw2-highlight">
-				BARRACKS
-			</h1>
+			<h1 className="mb-8 font-michroma text-[2rem] tracking-wider text-mw2-highlight">BARRACKS</h1>
 
 			<div className="flex flex-col gap-4">
 				{PROJECTS.map((project) => (

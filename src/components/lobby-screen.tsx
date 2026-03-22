@@ -40,10 +40,7 @@ export function LobbyScreen() {
 							Smyile
 						</h1>
 
-						<MainMenu
-							items={MENU_ITEMS}
-							onItemClick={handleMenuClick}
-						/>
+						<MainMenu items={MENU_ITEMS} onItemClick={handleMenuClick} />
 
 						<p className="mt-[6vh] font-barlow text-base tracking-wide text-mw2-text-dim">
 							Your NAT Type: <span className="font-semibold text-mw2-text">Open</span>

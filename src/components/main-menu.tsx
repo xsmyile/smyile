@@ -9,7 +9,10 @@ export function MainMenu({ items, onItemClick }: Props) {
 	return (
 		<nav className="flex flex-col items-end gap-0.5">
 			{items.map((item) => (
-				<div key={item.label} className="flex w-full flex-col items-end border-b border-mw2-separator/30">
+				<div
+					key={item.label}
+					className="flex w-full flex-col items-end border-b border-mw2-separator/30"
+				>
 					<button
 						type="button"
 						onClick={() => onItemClick(item)}

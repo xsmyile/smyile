@@ -40,4 +40,4 @@ export const MENU_ITEMS: MenuItem[] = [
 
 export const STEAM_PROFILE_URL = "https://steamcommunity.com/id/Smyile/"
 
-export const SITE_VERSION = "0.4.0"
+export const SITE_VERSION = "0.4.1"

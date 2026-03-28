@@ -1,8 +1,9 @@
-import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useState } from "react"
 import { useBootSequence } from "../hooks/use-boot-sequence"
 import { useGitHub } from "../hooks/use-github"
+import { useMediaQuery } from "../hooks/use-media-query"
 import { BootSequence } from "./boot-sequence"
 import { CyberBackground } from "./cyber-background"
 import { ActivityStream } from "./modules/activity-stream"
@@ -15,33 +16,37 @@ import { SystemLog } from "./modules/system-log"
 
 const DRAWER_SPRING = { type: "spring", damping: 26, stiffness: 220 } as const
 
-const GLASS =
-	"border-[#1a1a1a] bg-[rgba(8,8,12,0.65)] backdrop-blur-[4px]"
+const GLASS = "border-[#1a1a1a] bg-[rgba(8,8,12,0.65)] backdrop-blur-[4px]"
 
 export function DashboardLayout() {
 	const { phase, visibleLogs, skip } = useBootSequence()
 	const github = useGitHub()
+	const isDesktop = useMediaQuery("(min-width: 1024px)")
 	const [leftOpen, setLeftOpen] = useState(false)
 	const [rightOpen, setRightOpen] = useState(false)
 
-	const leftContent = (
+	const leftContent = (baseDelay: number) => (
 		<>
 			<GithubStats
 				user={github.user}
 				totalStars={github.totalStars}
 				loading={github.loading}
-				delay={100}
+				delay={baseDelay}
 			/>
-			<ActivityStream events={github.events} loading={github.loading} delay={200} />
-			<SocialModule delay={300} />
+			<ActivityStream events={github.events} loading={github.loading} delay={baseDelay + 100} />
+			<SocialModule delay={baseDelay + 200} />
 		</>
 	)
 
-	const rightContent = (
+	const rightContent = (baseDelay: number) => (
 		<>
-			<SystemLog github={github} delay={50} />
-			<StatusModule latestRelease={github.latestRelease} cached={github.cached} delay={150} />
-			<SpecsModule delay={250} />
+			<SystemLog github={github} delay={baseDelay} />
+			<StatusModule
+				latestRelease={github.latestRelease}
+				cached={github.cached}
+				delay={baseDelay + 100}
+			/>
+			<SpecsModule delay={baseDelay + 200} />
 		</>
 	)
 
@@ -52,18 +57,12 @@ export function DashboardLayout() {
 			<div className="scanlines relative min-h-screen w-full">
 				<CyberBackground />
 
-				{/* Desktop: 3-column grid */}
-				<div className="isolate mx-auto hidden min-h-screen w-full max-w-[1400px] gap-3 p-4 lg:grid lg:grid-cols-[280px_1fr_300px]">
-					<div className="flex flex-col gap-3">{leftContent}</div>
+				<div className="isolate mx-auto flex min-h-screen w-full max-w-[1400px] flex-col gap-3 p-3 md:p-4 lg:grid lg:grid-cols-[280px_1fr_300px]">
+					{isDesktop && <div className="flex flex-col gap-3">{leftContent(100)}</div>}
 					<div className="flex flex-col gap-3">
 						<HeroModule delay={0} />
 					</div>
-					<div className="flex flex-col gap-3">{rightContent}</div>
-				</div>
-
-				{/* Mobile: center only + drawers */}
-				<div className="isolate mx-auto flex min-h-screen w-full flex-col gap-3 p-3 md:p-4 lg:hidden">
-					<HeroModule delay={0} />
+					{isDesktop && <div className="flex flex-col gap-3">{rightContent(50)}</div>}
 				</div>
 
 				{/* Left drawer (mobile only) */}
@@ -87,14 +86,7 @@ export function DashboardLayout() {
 								transition={DRAWER_SPRING}
 								className={`fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col gap-3 overflow-y-auto border-r p-3 lg:hidden ${GLASS}`}
 							>
-								<GithubStats
-									user={github.user}
-									totalStars={github.totalStars}
-									loading={github.loading}
-									delay={0}
-								/>
-								<ActivityStream events={github.events} loading={github.loading} delay={50} />
-								<SocialModule delay={100} />
+								{leftContent(0)}
 							</motion.aside>
 						</>
 					)}
@@ -121,9 +113,7 @@ export function DashboardLayout() {
 								transition={DRAWER_SPRING}
 								className={`fixed inset-y-0 right-0 z-40 flex w-[300px] flex-col gap-3 overflow-y-auto border-l p-3 lg:hidden ${GLASS}`}
 							>
-								<SystemLog github={github} delay={0} />
-								<StatusModule latestRelease={github.latestRelease} cached={github.cached} delay={50} />
-								<SpecsModule delay={100} />
+								{rightContent(0)}
 							</motion.aside>
 						</>
 					)}

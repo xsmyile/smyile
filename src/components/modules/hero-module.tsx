@@ -74,7 +74,7 @@ export function HeroModule({ delay = 0 }: Props) {
 							>
 								<motion.h1
 									variants={fadeUp}
-									className="glitch-text font-michroma text-4xl tracking-[0.3em] text-sys-accent lg:text-6xl"
+									className="glitch-text font-display text-4xl font-semibold tracking-[0.3em] text-sys-accent lg:text-6xl"
 								>
 									{IDENTITY.name}
 								</motion.h1>

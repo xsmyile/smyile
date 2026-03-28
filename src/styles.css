@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-	--font-michroma: "Michroma", sans-serif;
+	--font-display: "IBM Plex Mono", monospace;
 	--font-barlow: "Barlow Condensed", sans-serif;
 	--font-mono: "JetBrains Mono", monospace;
 

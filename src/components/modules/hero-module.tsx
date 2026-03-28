@@ -61,6 +61,7 @@ export function HeroModule({ delay = 0 }: Props) {
 				<AnimatePresence>
 					{showName && (
 						<motion.div
+							key="hero-reveal"
 							initial={{ height: 0, opacity: 0 }}
 							animate={{ height: "auto", opacity: 1 }}
 							transition={{ duration: 0.5, ease: "easeOut" }}

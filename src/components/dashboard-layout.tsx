@@ -1,3 +1,6 @@
+import { useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useBootSequence } from "../hooks/use-boot-sequence"
 import { useGitHub } from "../hooks/use-github"
 import { BootSequence } from "./boot-sequence"
@@ -10,9 +13,37 @@ import { SpecsModule } from "./modules/specs-module"
 import { StatusModule } from "./modules/status-module"
 import { SystemLog } from "./modules/system-log"
 
+const DRAWER_SPRING = { type: "spring", damping: 26, stiffness: 220 } as const
+
+const GLASS =
+	"border-[#1a1a1a] bg-[rgba(8,8,12,0.65)] backdrop-blur-[4px]"
+
 export function DashboardLayout() {
 	const { phase, visibleLogs, skip } = useBootSequence()
 	const github = useGitHub()
+	const [leftOpen, setLeftOpen] = useState(false)
+	const [rightOpen, setRightOpen] = useState(false)
+
+	const leftContent = (
+		<>
+			<GithubStats
+				user={github.user}
+				totalStars={github.totalStars}
+				loading={github.loading}
+				delay={100}
+			/>
+			<ActivityStream events={github.events} loading={github.loading} delay={200} />
+			<SocialModule delay={300} />
+		</>
+	)
+
+	const rightContent = (
+		<>
+			<SystemLog github={github} delay={50} />
+			<StatusModule latestRelease={github.latestRelease} cached={github.cached} delay={150} />
+			<SpecsModule delay={250} />
+		</>
+	)
 
 	return (
 		<>
@@ -21,30 +52,103 @@ export function DashboardLayout() {
 			<div className="scanlines relative min-h-screen w-full">
 				<CyberBackground />
 
-				<div className="isolate mx-auto grid min-h-screen w-full max-w-[1400px] grid-cols-1 gap-3 p-3 md:p-4 lg:grid-cols-[280px_1fr_300px]">
-					{/* Left column — passive modules */}
-					<div className="order-3 flex flex-col gap-3 lg:order-1">
-						<GithubStats
-							user={github.user}
-							totalStars={github.totalStars}
-							loading={github.loading}
-							delay={100}
-						/>
-						<ActivityStream events={github.events} loading={github.loading} delay={200} />
-						<SocialModule delay={300} />
-					</div>
-
-					{/* Center column — core */}
-					<div className="order-1 flex flex-col gap-3 lg:order-2">
+				{/* Desktop: 3-column grid */}
+				<div className="isolate mx-auto hidden min-h-screen w-full max-w-[1400px] gap-3 p-4 lg:grid lg:grid-cols-[280px_1fr_300px]">
+					<div className="flex flex-col gap-3">{leftContent}</div>
+					<div className="flex flex-col gap-3">
 						<HeroModule delay={0} />
 					</div>
+					<div className="flex flex-col gap-3">{rightContent}</div>
+				</div>
 
-					{/* Right column — runtime */}
-					<div className="order-2 flex flex-col gap-3 lg:order-3">
-						<SystemLog github={github} delay={50} />
-						<StatusModule latestRelease={github.latestRelease} cached={github.cached} delay={150} />
-						<SpecsModule delay={250} />
-					</div>
+				{/* Mobile: center only + drawers */}
+				<div className="isolate mx-auto flex min-h-screen w-full flex-col gap-3 p-3 md:p-4 lg:hidden">
+					<HeroModule delay={0} />
+				</div>
+
+				{/* Left drawer (mobile only) */}
+				<AnimatePresence>
+					{leftOpen && (
+						<>
+							<motion.div
+								key="left-backdrop"
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								transition={{ duration: 0.2 }}
+								className="fixed inset-0 z-40 bg-black/20 lg:hidden"
+								onClick={() => setLeftOpen(false)}
+							/>
+							<motion.aside
+								key="left-drawer"
+								initial={{ x: "-100%" }}
+								animate={{ x: 0 }}
+								exit={{ x: "-100%" }}
+								transition={DRAWER_SPRING}
+								className={`fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col gap-3 overflow-y-auto border-r p-3 lg:hidden ${GLASS}`}
+							>
+								<GithubStats
+									user={github.user}
+									totalStars={github.totalStars}
+									loading={github.loading}
+									delay={0}
+								/>
+								<ActivityStream events={github.events} loading={github.loading} delay={50} />
+								<SocialModule delay={100} />
+							</motion.aside>
+						</>
+					)}
+				</AnimatePresence>
+
+				{/* Right drawer (mobile only) */}
+				<AnimatePresence>
+					{rightOpen && (
+						<>
+							<motion.div
+								key="right-backdrop"
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								transition={{ duration: 0.2 }}
+								className="fixed inset-0 z-40 bg-black/20 lg:hidden"
+								onClick={() => setRightOpen(false)}
+							/>
+							<motion.aside
+								key="right-drawer"
+								initial={{ x: "100%" }}
+								animate={{ x: 0 }}
+								exit={{ x: "100%" }}
+								transition={DRAWER_SPRING}
+								className={`fixed inset-y-0 right-0 z-40 flex w-[300px] flex-col gap-3 overflow-y-auto border-l p-3 lg:hidden ${GLASS}`}
+							>
+								<SystemLog github={github} delay={0} />
+								<StatusModule latestRelease={github.latestRelease} cached={github.cached} delay={50} />
+								<SpecsModule delay={100} />
+							</motion.aside>
+						</>
+					)}
+				</AnimatePresence>
+
+				{/* Floating toolbar (mobile only) */}
+				<div
+					className={`fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border px-3 py-2 lg:hidden ${GLASS}`}
+				>
+					<button
+						type="button"
+						aria-label="Toggle left panel"
+						onClick={() => setLeftOpen((v) => !v)}
+						className="rounded-full p-1.5 transition-colors hover:bg-white/5"
+					>
+						<ChevronLeft className="h-4 w-4 text-sys-accent" />
+					</button>
+					<button
+						type="button"
+						aria-label="Toggle right panel"
+						onClick={() => setRightOpen((v) => !v)}
+						className="rounded-full p-1.5 transition-colors hover:bg-white/5"
+					>
+						<ChevronRight className="h-4 w-4 text-sys-accent" />
+					</button>
 				</div>
 			</div>
 		</>

@@ -31,7 +31,3 @@ export function getVisitorId(): string {
 	sessionStorage.setItem("smyile_visitor_id", id)
 	return id
 }
-
-export function getVisitorLevel(): number {
-	return 1
-}

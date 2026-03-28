@@ -29,7 +29,7 @@ function sumStars(repoSets: GitHubRepo[][]): number {
 	return repoSets.flat().reduce((sum, repo) => sum + repo.stargazers_count, 0)
 }
 
-export function useGitHub(): GitHubData & { refetch: () => void } {
+export function useGitHub(): GitHubData {
 	const [state, setState] = useState<GitHubData>({
 		user: null,
 		totalStars: 0,
@@ -94,5 +94,5 @@ export function useGitHub(): GitHubData & { refetch: () => void } {
 		fetchAll()
 	}, [fetchAll])
 
-	return { ...state, refetch: fetchAll }
+	return state
 }

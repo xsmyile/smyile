@@ -30,8 +30,8 @@ export const PROJECTS = [
 ] as const
 
 export const SOCIAL_LINKS = [
-	{ label: "GitHub", url: `https://github.com/${GITHUB_USERNAME}`, icon: "gh" },
-	{ label: "Steam", url: "https://steamcommunity.com/id/Smyile/", icon: "steam" },
+	{ label: "GitHub", url: `https://github.com/${GITHUB_USERNAME}` },
+	{ label: "Steam", url: "https://steamcommunity.com/id/Smyile/" },
 ] as const
 
 export const SPECIALIZATIONS = [

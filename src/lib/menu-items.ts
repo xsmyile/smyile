@@ -9,7 +9,7 @@ export type MenuAction = { type: "link"; url: string } | { type: "route"; path: 
 export const MENU_ITEMS: MenuItem[] = [
 	{
 		label: "FIND GAME",
-		action: { type: "link", url: "https://github.com/davidetacchini" },
+		action: { type: "link", url: "https://github.com/xsmyile" },
 	},
 	{
 		label: "ABOUT",
@@ -30,7 +30,7 @@ export const MENU_ITEMS: MenuItem[] = [
 	},
 	{
 		label: "CHANGELOG",
-		action: { type: "link", url: "https://github.com/davidetacchini/smyile/releases" },
+		action: { type: "link", url: "https://github.com/xsmyile/smyile/releases" },
 	},
 	{
 		label: "WEBSITE",

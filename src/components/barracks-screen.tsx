@@ -15,7 +15,7 @@ const PROJECTS = [
 	},
 	{
 		name: "SMYILE",
-		url: "https://github.com/davidetacchini/smyile",
+		url: "https://github.com/xsmyile/smyile",
 		description: "This site — MW2 lobby UI replica",
 	},
 ]

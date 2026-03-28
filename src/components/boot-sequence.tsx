@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useRef } from "react"
 import type { BootPhase } from "../hooks/use-boot-sequence"
+import { SITE_VERSION } from "../lib/constants"
 
 type BootLog = {
 	time: string
@@ -38,7 +39,7 @@ export function BootSequence({ phase, logs, onSkip }: Props) {
 				>
 					<div className="mx-auto w-full max-w-lg">
 						<div className="mb-6 font-mono text-[0.8rem] tracking-wider text-sys-text-dim">
-							SMYILE SYSTEM v0.5.0
+							SMYILE SYSTEM v{SITE_VERSION}
 						</div>
 
 						<div className="flex flex-col gap-1">

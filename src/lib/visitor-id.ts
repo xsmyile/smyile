@@ -22,13 +22,13 @@ function getFingerprint(): string {
 }
 
 export function getVisitorId(): string {
-	const stored = sessionStorage.getItem("mw2-visitor-id")
+	const stored = sessionStorage.getItem("smyile_visitor_id")
 	if (stored) return stored
 
 	const fingerprint = getFingerprint()
 	const hash = hashCode(fingerprint)
 	const id = hash.toString(16).toUpperCase().padStart(8, "0").slice(0, 8)
-	sessionStorage.setItem("mw2-visitor-id", id)
+	sessionStorage.setItem("smyile_visitor_id", id)
 	return id
 }
 

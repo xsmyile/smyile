@@ -1,29 +1,19 @@
 import { createRootRoute, createRoute } from "@tanstack/react-router"
-import { AboutScreen } from "../components/about-screen"
-import { BarracksScreen } from "../components/barracks-screen"
-import { LobbyScreen } from "../components/lobby-screen"
-import { MW2Layout } from "../components/mw2-layout"
+import { ActivityScreen } from "../components/activity-screen"
+import { DashboardLayout } from "../components/dashboard-layout"
 
-const rootRoute = createRootRoute({
-	component: MW2Layout,
-})
+const rootRoute = createRootRoute()
 
 const indexRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/",
-	component: LobbyScreen,
+	component: DashboardLayout,
 })
 
-const aboutRoute = createRoute({
+const activityRoute = createRoute({
 	getParentRoute: () => rootRoute,
-	path: "/about",
-	component: AboutScreen,
+	path: "/activity",
+	component: ActivityScreen,
 })
 
-const barracksRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/barracks",
-	component: BarracksScreen,
-})
-
-export const routeTree = rootRoute.addChildren([indexRoute, aboutRoute, barracksRoute])
+export const routeTree = rootRoute.addChildren([indexRoute, activityRoute])

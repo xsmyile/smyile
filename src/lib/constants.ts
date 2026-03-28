@@ -43,8 +43,8 @@ export const SPECIALIZATIONS = [
 ] as const
 
 export const ORGANIZATIONS = [
-	{ name: "rustmailapp", url: "https://github.com/rustmailapp" },
 	{ name: "radonforge", url: "https://github.com/radonforge" },
+	{ name: "rustmailapp", url: "https://github.com/rustmailapp" },
 ] as const
 
 export const STATUS = {

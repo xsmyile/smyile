@@ -60,54 +60,20 @@
 	);
 }
 
-/* Flickering grid background */
-.flicker-grid {
-	background-image:
-		linear-gradient(rgba(137, 207, 240, 0.015) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(137, 207, 240, 0.015) 1px, transparent 1px);
-	background-size: 40px 40px;
+/* Module panels — deep black glass, grid bleeds through */
+.module-panel-card {
+	background: rgba(8, 8, 12, 0.65);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+	transition:
+		border-color 0.25s ease,
+		box-shadow 0.25s ease;
 }
 
-.flicker-grid::before,
-.flicker-grid::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	background-image:
-		linear-gradient(rgba(137, 207, 240, 0.02) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(137, 207, 240, 0.02) 1px, transparent 1px);
-	background-size: 40px 40px;
-}
-
-.flicker-grid::before {
-	animation: flicker-a 4s ease-in-out infinite;
-}
-
-.flicker-grid::after {
-	animation: flicker-b 6s ease-in-out infinite;
-	background-position: 20px 20px;
-}
-
-@keyframes flicker-a {
-	0%,
-	100% {
-		opacity: 0;
-	}
-	30%,
-	70% {
-		opacity: 1;
-	}
-}
-
-@keyframes flicker-b {
-	0%,
-	100% {
-		opacity: 1;
-	}
-	40%,
-	60% {
-		opacity: 0;
-	}
+.module-panel-card:hover {
+	border-color: rgba(137, 207, 240, 0.2);
+	box-shadow:
+		0 0 12px rgba(137, 207, 240, 0.06),
+		0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 /* Glitch effect for hero name */
@@ -213,15 +179,4 @@
 
 .boot-line {
 	animation: boot-line-in 0.15s ease-out forwards;
-}
-
-/* Slow background pulse */
-@keyframes bg-pulse {
-	0%,
-	100% {
-		opacity: 0.03;
-	}
-	50% {
-		opacity: 0.06;
-	}
 }

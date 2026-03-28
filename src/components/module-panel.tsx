@@ -28,10 +28,10 @@ export function ModulePanel({
 }: Props) {
 	return (
 		<div
-			className={`module-enter border border-sys-border bg-sys-surface/60 backdrop-blur-sm ${className}`}
+			className={`module-enter module-panel-card border border-[#1a1a1a] ${className}`}
 			style={{ animationDelay: `${delay}ms` }}
 		>
-			<div className="flex items-center justify-between border-b border-sys-border px-4 py-2">
+			<div className="flex items-center justify-between border-b border-[#1a1a1a] px-4 py-2">
 				<span className="font-mono text-[0.7rem] tracking-[0.15em] text-sys-text-dim">
 					[ {title} ]
 				</span>

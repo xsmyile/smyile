@@ -21,7 +21,7 @@ export function DashboardLayout() {
 			<div className="scanlines relative min-h-screen w-full">
 				<CyberBackground />
 
-				<div className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1400px] grid-cols-1 gap-3 p-3 md:p-4 lg:grid-cols-[280px_1fr_300px]">
+				<div className="isolate mx-auto grid min-h-screen w-full max-w-[1400px] grid-cols-1 gap-3 p-3 md:p-4 lg:grid-cols-[280px_1fr_300px]">
 					{/* Left column — passive modules */}
 					<div className="order-3 flex flex-col gap-3 lg:order-1">
 						<GithubStats

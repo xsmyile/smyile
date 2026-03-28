@@ -82,7 +82,7 @@ export function SystemLog({ github, delay = 0 }: Props) {
 			prevCountRef.current = logs.length
 			scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
 		}
-	})
+	}, [logs.length])
 
 	return (
 		<ModulePanel title="SYSTEM_LOG" status="ONLINE" delay={delay}>

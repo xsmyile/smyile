@@ -52,20 +52,24 @@ export function useBootSequence() {
 		if (skipBoot) return
 
 		let index = 0
+		let readyTimeout: ReturnType<typeof setTimeout>
 		const interval = setInterval(() => {
 			if (index < BOOT_LOGS.length) {
 				setVisibleLogs((prev) => [...prev, BOOT_LOGS[index]])
 				index++
 			} else {
 				clearInterval(interval)
-				setTimeout(() => {
+				readyTimeout = setTimeout(() => {
 					setPhase("ready")
 					markBootSeen()
 				}, 400)
 			}
 		}, LOG_INTERVAL)
 
-		return () => clearInterval(interval)
+		return () => {
+			clearInterval(interval)
+			clearTimeout(readyTimeout)
+		}
 	}, [skipBoot])
 
 	return { phase, visibleLogs, skip }

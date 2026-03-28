@@ -19,6 +19,12 @@ type GitHubData = {
 	error: string | null
 }
 
+const FILTERED_EVENTS = new Set(["WatchEvent", "IssueCommentEvent"])
+
+function filterEvents(events: GitHubEvent[]): GitHubEvent[] {
+	return events.filter((e) => !FILTERED_EVENTS.has(e.type))
+}
+
 function sumStars(repoSets: GitHubRepo[][]): number {
 	return repoSets.flat().reduce((sum, repo) => sum + repo.stargazers_count, 0)
 }
@@ -51,7 +57,8 @@ export function useGitHub(): GitHubData & { refetch: () => void } {
 
 			const user = userResult.status === "fulfilled" ? userResult.value.data : null
 			const userRepos = userReposResult.status === "fulfilled" ? userReposResult.value.data : []
-			const events = eventsResult.status === "fulfilled" ? eventsResult.value.data : []
+			const events =
+				eventsResult.status === "fulfilled" ? filterEvents(eventsResult.value.data) : []
 			const releases = releaseResult.status === "fulfilled" ? releaseResult.value.data : []
 
 			const allRepoSets = [userRepos]

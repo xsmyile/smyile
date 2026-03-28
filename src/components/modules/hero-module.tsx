@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { useEffect, useRef, useState } from "react"
 import { IDENTITY, ORGANIZATIONS, PROJECTS, SOCIAL_LINKS } from "../../lib/constants"
 import { ModulePanel } from "../module-panel"
 
@@ -6,9 +7,23 @@ type Props = {
 	delay?: number
 }
 
+const stagger = {
+	hidden: { opacity: 0 },
+	visible: {
+		opacity: 1,
+		transition: { staggerChildren: 0.12 },
+	},
+}
+
+const fadeUp = {
+	hidden: { opacity: 0, y: 12 },
+	visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
+}
+
 export function HeroModule({ delay = 0 }: Props) {
 	const [typed, setTyped] = useState("")
 	const [showName, setShowName] = useState(false)
+	const revealTimeout = useRef<ReturnType<typeof setTimeout>>(undefined)
 	const command = "whoami"
 
 	useEffect(() => {
@@ -19,10 +34,13 @@ export function HeroModule({ delay = 0 }: Props) {
 				i++
 			} else {
 				clearInterval(interval)
-				setTimeout(() => setShowName(true), 300)
+				revealTimeout.current = setTimeout(() => setShowName(true), 300)
 			}
 		}, 80)
-		return () => clearInterval(interval)
+		return () => {
+			clearInterval(interval)
+			clearTimeout(revealTimeout.current)
+		}
 	}, [])
 
 	return (
@@ -39,94 +57,111 @@ export function HeroModule({ delay = 0 }: Props) {
 					</div>
 				</div>
 
-				{/* Name with glitch */}
-				{showName && (
-					<>
-						<h1 className="glitch-text font-michroma text-4xl tracking-[0.3em] text-sys-accent lg:text-6xl">
-							{IDENTITY.name}
-						</h1>
-
-						<div className="flex flex-col items-center gap-2">
-							<p className="font-mono text-sm tracking-wider text-sys-text-dim">
-								{">"} {IDENTITY.role}
-							</p>
-							<p className="max-w-sm font-barlow text-base leading-relaxed tracking-wide text-sys-text-dim">
-								{IDENTITY.bio}
-							</p>
-						</div>
-
-						{/* CTA links */}
-						<div className="flex flex-wrap justify-center gap-2">
-							{SOCIAL_LINKS.map((link) => (
-								<a
-									key={link.label}
-									href={link.url}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="border border-sys-accent/30 px-4 py-1.5 font-mono text-xs tracking-[0.15em] text-sys-accent transition-all hover:border-sys-accent hover:bg-sys-accent/10 hover:shadow-[0_0_12px_rgba(137,207,240,0.15)]"
+				{/* Post-whoami content — morphs in */}
+				<AnimatePresence>
+					{showName && (
+						<motion.div
+							initial={{ height: 0, opacity: 0 }}
+							animate={{ height: "auto", opacity: 1 }}
+							transition={{ duration: 0.5, ease: "easeOut" }}
+							className="w-full overflow-hidden"
+						>
+							<motion.div
+								className="flex flex-col items-center gap-6 text-center"
+								variants={stagger}
+								initial="hidden"
+								animate="visible"
+							>
+								<motion.h1
+									variants={fadeUp}
+									className="glitch-text font-michroma text-4xl tracking-[0.3em] text-sys-accent lg:text-6xl"
 								>
-									{">> "}
-									{link.label.toUpperCase()}
-								</a>
-							))}
-						</div>
+									{IDENTITY.name}
+								</motion.h1>
 
-						{/* Projects */}
-						<div className="mt-4 w-full max-w-md text-left">
-							<div className="mb-2 font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
-								[ DEPLOYED_SYSTEMS ]
-							</div>
-							<div className="flex flex-col gap-1">
-								{PROJECTS.map((project) => (
-									<a
-										key={project.name}
-										href={project.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="group flex items-center justify-between border-b border-sys-border/50 py-1.5 transition-colors"
-									>
-										<div className="flex flex-col gap-0.5">
-											<span className="font-mono text-xs tracking-[0.15em] text-sys-text transition-colors group-hover:text-sys-accent">
-												{project.name}
-											</span>
-											<span className="font-barlow text-[0.8rem] text-sys-text-dim">
-												{project.description}
-											</span>
-										</div>
-										<span className="font-mono text-[0.8rem] tracking-wider text-sys-text-dim transition-colors group-hover:text-sys-green">
-											ACTIVE
-										</span>
-									</a>
-								))}
-							</div>
-						</div>
+								<motion.div variants={fadeUp} className="flex flex-col items-center gap-2">
+									<p className="font-mono text-sm tracking-wider text-sys-text-dim">
+										{">"} {IDENTITY.role}
+									</p>
+									<p className="max-w-sm font-barlow text-base leading-relaxed tracking-wide text-sys-text-dim">
+										{IDENTITY.bio}
+									</p>
+								</motion.div>
 
-						{/* Organizations */}
-						<div className="mt-2 w-full max-w-md text-left">
-							<div className="mb-2 font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
-								[ ORGANIZATIONS ]
-							</div>
-							<div className="flex flex-col gap-1">
-								{ORGANIZATIONS.map((org) => (
-									<a
-										key={org.name}
-										href={org.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="group flex items-center justify-between border-b border-sys-border/50 py-1.5 transition-colors"
-									>
-										<span className="font-mono text-xs tracking-[0.15em] text-sys-text transition-colors group-hover:text-sys-accent">
-											github.com/{org.name}
-										</span>
-										<span className="font-mono text-[0.8rem] tracking-wider text-sys-text-dim transition-colors group-hover:text-sys-accent">
-											→
-										</span>
-									</a>
-								))}
-							</div>
-						</div>
-					</>
-				)}
+								{/* CTA links */}
+								<motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-2">
+									{SOCIAL_LINKS.map((link) => (
+										<a
+											key={link.label}
+											href={link.url}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="border border-sys-accent/30 px-4 py-1.5 font-mono text-xs tracking-[0.15em] text-sys-accent transition-all hover:border-sys-accent hover:bg-sys-accent/10 hover:shadow-[0_0_12px_rgba(137,207,240,0.15)]"
+										>
+											{">> "}
+											{link.label.toUpperCase()}
+										</a>
+									))}
+								</motion.div>
+
+								{/* Projects */}
+								<motion.div variants={fadeUp} className="mt-4 w-full max-w-md text-left">
+									<div className="mb-2 font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
+										[ DEPLOYED_SYSTEMS ]
+									</div>
+									<div className="flex flex-col gap-1">
+										{PROJECTS.map((project) => (
+											<a
+												key={project.name}
+												href={project.url}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="group flex items-center justify-between border-b border-sys-border/50 py-1.5 transition-colors"
+											>
+												<div className="flex flex-col gap-0.5">
+													<span className="font-mono text-xs tracking-[0.15em] text-sys-text transition-colors group-hover:text-sys-accent">
+														{project.name}
+													</span>
+													<span className="font-barlow text-[0.8rem] text-sys-text-dim">
+														{project.description}
+													</span>
+												</div>
+												<span className="font-mono text-[0.8rem] tracking-wider text-sys-text-dim transition-colors group-hover:text-sys-green">
+													ACTIVE
+												</span>
+											</a>
+										))}
+									</div>
+								</motion.div>
+
+								{/* Organizations */}
+								<motion.div variants={fadeUp} className="mt-2 w-full max-w-md text-left">
+									<div className="mb-2 font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
+										[ ORGANIZATIONS ]
+									</div>
+									<div className="flex flex-col gap-1">
+										{ORGANIZATIONS.map((org) => (
+											<a
+												key={org.name}
+												href={org.url}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="group flex items-center justify-between border-b border-sys-border/50 py-1.5 transition-colors"
+											>
+												<span className="font-mono text-xs tracking-[0.15em] text-sys-text transition-colors group-hover:text-sys-accent">
+													github.com/{org.name}
+												</span>
+												<span className="font-mono text-[0.8rem] tracking-wider text-sys-text-dim transition-colors group-hover:text-sys-accent">
+													→
+												</span>
+											</a>
+										))}
+									</div>
+								</motion.div>
+							</motion.div>
+						</motion.div>
+					)}
+				</AnimatePresence>
 			</div>
 		</ModulePanel>
 	)

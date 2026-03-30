@@ -4,7 +4,6 @@ export const SITE_VERSION = "0.5.0"
 export const IDENTITY = {
 	name: "Smyile",
 	role: "Software Engineer",
-	bio: "Building tools, breaking systems, shipping code.",
 	timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 } as const
 
@@ -12,19 +11,19 @@ export const PROJECTS = [
 	{
 		name: "RUSTMAIL",
 		url: "https://github.com/rustmailapp/rustmail",
-		description: "Email infrastructure in Rust",
+		description: "Self-hosted SMTP mail catcher with web UI",
 		repo: "rustmailapp/rustmail",
 	},
 	{
 		name: "OVERBOT",
 		url: "https://overbot.net",
-		description: "Overwatch stats and tracking bot",
+		description: "Discord bot for Overwatch 2 stats and rankings",
 		repo: "xsmyile/overbot",
 	},
 	{
 		name: "MIZU",
 		url: "https://mizu.davidet.com",
-		description: "Water tracking app",
+		description: "Smart watering system",
 		repo: "mizu-systems/mizu-web",
 	},
 ] as const

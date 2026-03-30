@@ -84,9 +84,6 @@ export function HeroModule({ delay = 0 }: Props) {
 									<p className="font-mono text-sm tracking-wider text-sys-text-dim">
 										{">"} {IDENTITY.role}
 									</p>
-									<p className="max-w-sm font-barlow text-base leading-relaxed tracking-wide text-sys-text-dim">
-										{IDENTITY.bio}
-									</p>
 								</motion.div>
 
 								{/* CTA links */}
@@ -106,11 +103,11 @@ export function HeroModule({ delay = 0 }: Props) {
 								</motion.div>
 
 								{/* Projects */}
-								<motion.div variants={fadeUp} className="mt-4 w-full max-w-md text-left">
-									<div className="mb-2 font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
-										[ DEPLOYED_SYSTEMS ]
+								<motion.div variants={fadeUp} className="mt-4 w-full max-w-md">
+									<div className="mb-2 text-center font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
+										[ PROJECTS ]
 									</div>
-									<div className="flex flex-col gap-1">
+									<div className="flex flex-col gap-1 text-left">
 										{PROJECTS.map((project) => (
 											<a
 												key={project.name}
@@ -123,7 +120,7 @@ export function HeroModule({ delay = 0 }: Props) {
 													<span className="font-mono text-xs tracking-[0.15em] text-sys-text transition-colors group-hover:text-sys-accent">
 														{project.name}
 													</span>
-													<span className="font-barlow text-[0.8rem] text-sys-text-dim">
+													<span className="font-barlow text-sm text-sys-text-dim">
 														{project.description}
 													</span>
 												</div>
@@ -136,11 +133,11 @@ export function HeroModule({ delay = 0 }: Props) {
 								</motion.div>
 
 								{/* Organizations */}
-								<motion.div variants={fadeUp} className="mt-2 w-full max-w-md text-left">
-									<div className="mb-2 font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
+								<motion.div variants={fadeUp} className="mt-2 w-full max-w-md">
+									<div className="mb-2 text-center font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
 										[ ORGANIZATIONS ]
 									</div>
-									<div className="flex flex-col gap-1">
+									<div className="flex flex-col gap-1 text-left">
 										{ORGANIZATIONS.map((org) => (
 											<a
 												key={org.name}

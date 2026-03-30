@@ -13,6 +13,7 @@ import { SocialModule } from "./modules/social-module"
 import { SpecsModule } from "./modules/specs-module"
 import { StatusModule } from "./modules/status-module"
 import { SystemLog } from "./modules/system-log"
+import { TerminalModule } from "./modules/terminal-module"
 import { TickerStrip } from "./ticker-strip"
 
 const DRAWER_SPRING = { type: "spring", damping: 26, stiffness: 220 } as const
@@ -71,11 +72,12 @@ export function DashboardLayout() {
 			<GithubStats
 				user={github.user}
 				totalStars={github.totalStars}
+				repos={github.repos}
+				events={github.events}
 				loading={github.loading}
 				delay={baseDelay}
 			/>
 			<ActivityStream events={github.events} loading={github.loading} delay={baseDelay + 100} />
-			<SocialModule delay={baseDelay + 200} />
 		</>
 	)
 
@@ -88,6 +90,7 @@ export function DashboardLayout() {
 				delay={baseDelay + 100}
 			/>
 			<SpecsModule delay={baseDelay + 200} />
+			<SocialModule delay={baseDelay + 300} />
 		</>
 	)
 
@@ -102,6 +105,12 @@ export function DashboardLayout() {
 					{isDesktop && <div className="flex flex-col gap-3">{leftContent(100)}</div>}
 					<div className="flex flex-col gap-3">
 						<HeroModule delay={0} />
+						<TerminalModule
+							user={github.user}
+							totalStars={github.totalStars}
+							events={github.events}
+							delay={200}
+						/>
 					</div>
 					{isDesktop && <div className="flex flex-col gap-3">{rightContent(50)}</div>}
 				</div>

@@ -76,7 +76,7 @@ const COMMANDS: Record<string, CommandHandler> = {
 	},
 
 	ls: (args) => {
-		if (args.trim() === "projects") {
+		if (args.trim().toLowerCase() === "projects") {
 			return PROJECTS.map((p) => ({
 				text: `  ${p.name.padEnd(12)} ${p.description}`,
 			}))
@@ -127,13 +127,7 @@ const COMMANDS: Record<string, CommandHandler> = {
 		const specs = SPECIALIZATIONS.map((s) => s.name).join(", ")
 		const orgs = ORGANIZATIONS.map((o) => o.name).join(", ")
 		return [
-			{ text: "        ___        " },
-			{ text: "       /   \\       ", color: "var(--color-sys-accent)" },
-			{ text: "      | o o |      ", color: "var(--color-sys-accent)" },
-			{ text: "       \\_-_/       ", color: "var(--color-sys-accent)" },
-			{ text: "      /|   |\\      " },
-			{ text: "" },
-			{ text: `  ${IDENTITY.name}@smyile`, color: "var(--color-sys-accent)" },
+			{ text: "  smyile@blackbird", color: "var(--color-sys-accent)" },
 			{ text: "  ─────────────────" },
 			{ text: `  role:    ${IDENTITY.role}` },
 			{ text: `  version: v${SITE_VERSION}` },

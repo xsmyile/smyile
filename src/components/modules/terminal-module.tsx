@@ -27,6 +27,7 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 	const [input, setInput] = useState("")
 	const [cmdHistory, setCmdHistory] = useState<string[]>([])
 	const [historyIndex, setHistoryIndex] = useState(-1)
+	const [focused, setFocused] = useState(false)
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const inputRef = useRef<HTMLInputElement>(null)
 	const entryIdRef = useRef(0)
@@ -49,10 +50,8 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 		if (result.clear) {
 			setHistory([])
 		} else {
-			setHistory((prev) => [
-				...prev,
-				{ id: ++entryIdRef.current, command: trimmed, output: result.output },
-			])
+			const nextId = ++entryIdRef.current
+			setHistory((prev) => [...prev, { id: nextId, command: trimmed, output: result.output }])
 		}
 
 		setCmdHistory((prev) => [trimmed, ...prev])
@@ -61,6 +60,14 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 	}
 
 	function handleKeyDown(e: React.KeyboardEvent) {
+		if (e.key === "c" && (e.ctrlKey || e.metaKey) && input && !window.getSelection()?.toString()) {
+			e.preventDefault()
+			const nextId = ++entryIdRef.current
+			setHistory((prev) => [...prev, { id: nextId, command: `${input}^C`, output: [] }])
+			setHistoryIndex(-1)
+			setInput("")
+			return
+		}
 		if (e.key === "ArrowUp") {
 			e.preventDefault()
 			const next = Math.min(historyIndex + 1, cmdHistory.length - 1)
@@ -118,6 +125,8 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
 						onKeyDown={handleKeyDown}
+						onFocus={() => setFocused(true)}
+						onBlur={() => setFocused(false)}
 						className="absolute inset-0 z-10 w-full bg-transparent text-transparent caret-transparent outline-none"
 						spellCheck={false}
 						autoComplete="off"
@@ -127,7 +136,7 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 						<span className="text-sys-text-dim"> : </span>
 						<span className="text-sys-accent">~$ </span>
 						<span className="text-sys-text">{input}</span>
-						<span className="cursor-blink" />
+						{focused && <span className="cursor-blink" />}
 					</div>
 				</form>
 			</div>

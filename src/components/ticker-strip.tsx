@@ -20,9 +20,7 @@ const FILLER = [
 ]
 
 function buildItems(events: GitHubEvent[]): string[] {
-	const activity = events
-		.slice(0, 8)
-		.map(formatEventDescription)
+	const activity = events.slice(0, 8).map(formatEventDescription)
 
 	const shuffled = [...FILLER].sort(() => Math.random() - 0.5)
 	const fillerSlice = shuffled.slice(0, Math.max(4, 8 - activity.length))

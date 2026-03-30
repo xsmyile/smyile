@@ -37,7 +37,7 @@ const materialize = {
 		transition: {
 			delay: delay / 1000,
 			duration: 0.35,
-			ease: [0.22, 0.68, 0.35, 1.0],
+			ease: [0.22, 0.68, 0.35, 1.0] as [number, number, number, number],
 			opacity: {
 				delay: delay / 1000,
 				duration: 0.3,

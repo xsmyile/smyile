@@ -144,6 +144,7 @@ export function formatEventDescription(event: GitHubEvent): string {
 	switch (event.type) {
 		case "PushEvent": {
 			const count = event.payload.commits?.length ?? 0
+			if (count === 0) return `[${repo}] synced branch`
 			const msg = event.payload.commits?.[0]?.message.split("\n")[0] ?? ""
 			return `[${repo}] pushed ${count} commit${count !== 1 ? "s" : ""}: ${msg}`
 		}

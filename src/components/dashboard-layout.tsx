@@ -13,6 +13,7 @@ import { SocialModule } from "./modules/social-module"
 import { SpecsModule } from "./modules/specs-module"
 import { StatusModule } from "./modules/status-module"
 import { SystemLog } from "./modules/system-log"
+import { TickerStrip } from "./ticker-strip"
 
 const DRAWER_SPRING = { type: "spring", damping: 26, stiffness: 220 } as const
 
@@ -57,7 +58,7 @@ export function DashboardLayout() {
 			<div className="scanlines relative min-h-screen w-full">
 				<CyberBackground />
 
-				<div className="isolate mx-auto flex min-h-screen w-full max-w-[1400px] flex-col gap-3 p-3 md:p-4 lg:grid lg:grid-cols-[280px_1fr_300px]">
+				<div className="isolate mx-auto flex min-h-screen w-full max-w-[1400px] flex-col gap-3 p-3 pt-10 md:p-4 md:pt-10 lg:grid lg:grid-cols-[280px_1fr_300px] lg:pt-10">
 					{isDesktop && <div className="flex flex-col gap-3">{leftContent(100)}</div>}
 					<div className="flex flex-col gap-3">
 						<HeroModule delay={0} />
@@ -140,7 +141,9 @@ export function DashboardLayout() {
 						<ChevronRight className="h-4 w-4 text-sys-accent" />
 					</button>
 				</div>
-			</div>
-		</>
-	)
-}
+
+					<TickerStrip events={github.events} />
+				</div>
+			</>
+		)
+	}

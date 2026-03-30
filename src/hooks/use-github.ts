@@ -12,6 +12,7 @@ import {
 type GitHubData = {
 	user: GitHubUser | null
 	totalStars: number
+	repos: GitHubRepo[]
 	events: GitHubEvent[]
 	latestRelease: GitHubRelease | null
 	loading: boolean
@@ -33,6 +34,7 @@ export function useGitHub(): GitHubData {
 	const [state, setState] = useState<GitHubData>({
 		user: null,
 		totalStars: 0,
+		repos: [],
 		events: [],
 		latestRelease: null,
 		loading: true,
@@ -72,9 +74,12 @@ export function useGitHub(): GitHubData {
 				(userResult.status === "fulfilled" && userResult.value.cached) ||
 				(eventsResult.status === "fulfilled" && eventsResult.value.cached)
 
+			const allRepos = allRepoSets.flat()
+
 			setState({
 				user,
 				totalStars: sumStars(allRepoSets),
+				repos: allRepos,
 				events,
 				latestRelease: releases[0] ?? null,
 				loading: false,

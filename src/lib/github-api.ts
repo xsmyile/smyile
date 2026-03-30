@@ -120,6 +120,7 @@ export type GitHubEvent = {
 }
 
 export type GitHubRepo = {
+	name: string
 	stargazers_count: number
 }
 

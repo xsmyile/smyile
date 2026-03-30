@@ -5,6 +5,7 @@ import { getVisitorId } from "./visitor-id"
 export type OutputLine = {
 	text: string
 	color?: string
+	image?: string
 }
 
 export type TerminalContext = {
@@ -159,6 +160,8 @@ const COMMANDS: Record<string, CommandHandler> = {
 			{ text: `1 packet transmitted, 1 received, 0% packet loss` },
 		]
 	},
+
+	claude: () => [{ text: "", image: "/claude.png" }],
 
 	secret: () => [
 		{ text: "ACCESS GRANTED", color: "var(--color-sys-green)" },

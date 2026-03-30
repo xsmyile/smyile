@@ -105,16 +105,28 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 								<span className="text-sys-text">{entry.command}</span>
 							</div>
 						)}
-						{entry.output.map((line, j) => (
-							<div
-								// biome-ignore lint/suspicious/noArrayIndexKey: output lines are static per entry
-								key={j}
-								className="whitespace-pre text-sys-text"
-								style={line.color ? { color: line.color } : undefined}
-							>
-								{line.text || "\u00A0"}
-							</div>
-						))}
+						{entry.output.map((line, j) =>
+							line.image ? (
+								<img
+									// biome-ignore lint/suspicious/noArrayIndexKey: output lines are static per entry
+									key={j}
+									src={line.image}
+									alt="Claude pixel art logo"
+									className="pointer-events-none my-2 h-24 w-auto select-none"
+									draggable={false}
+									style={{ imageRendering: "pixelated" }}
+								/>
+							) : (
+								<div
+									// biome-ignore lint/suspicious/noArrayIndexKey: output lines are static per entry
+									key={j}
+									className="whitespace-pre text-sys-text"
+									style={line.color ? { color: line.color } : undefined}
+								>
+									{line.text || "\u00A0"}
+								</div>
+							),
+						)}
 					</div>
 				))}
 

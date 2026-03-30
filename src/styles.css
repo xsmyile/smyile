@@ -183,7 +183,13 @@
 }
 
 .ticker-scroll {
-	animation: ticker-scroll 30s linear infinite;
+	animation: ticker-scroll 8s linear infinite;
+}
+
+@media (min-width: 768px) {
+	.ticker-scroll {
+		animation-duration: 20s;
+	}
 }
 
 .ticker-strip {

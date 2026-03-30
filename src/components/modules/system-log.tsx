@@ -88,7 +88,7 @@ export function SystemLog({ github, delay = 0 }: Props) {
 		<ModulePanel title="SYSTEM_LOG" status="ONLINE" delay={delay}>
 			<div ref={scrollRef} className="flex max-h-32 flex-col gap-0.5 overflow-y-auto">
 				{logs.map((log) => (
-					<div key={log.id} className="font-mono text-[0.75rem] leading-tight">
+					<div key={log.id} className="log-entry-new font-mono text-[0.75rem] leading-tight">
 						<span className="text-sys-text-dim">[{log.time}]</span>{" "}
 						<span className="text-sys-accent">{log.module}</span>{" "}
 						<span className="text-sys-text-dim">::</span>{" "}

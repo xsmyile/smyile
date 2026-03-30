@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import {
 	formatEventDescription,
 	formatRelativeTime,
@@ -45,14 +44,6 @@ export function ActivityStream({ events, loading, delay = 0 }: Props) {
 						</span>
 					</div>
 				))}
-				{events.length > 8 && (
-					<Link
-						to="/activity"
-						className="mt-1 font-mono text-[0.8rem] tracking-wider text-sys-accent transition-colors hover:text-sys-text"
-					>
-						view all →
-					</Link>
-				)}
 			</div>
 		</ModulePanel>
 	)

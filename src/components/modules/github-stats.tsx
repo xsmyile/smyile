@@ -22,7 +22,7 @@ function AnimatedNumber({ target, duration = 1200 }: { target: number; duration?
 		function step(now: number) {
 			const progress = Math.min((now - start) / duration, 1)
 			const eased = 1 - (1 - progress) ** 3
-			const value = Math.floor(from + eased * (target - from))
+			const value = progress >= 1 ? target : Math.round(from + eased * (target - from))
 			setCurrent(value)
 			if (progress < 1) {
 				raf = requestAnimationFrame(step)

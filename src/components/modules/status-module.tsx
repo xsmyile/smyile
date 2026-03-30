@@ -15,7 +15,6 @@ export function StatusModule({ latestRelease, cached, delay = 0 }: Props) {
 	const rows = [
 		{ label: "STATUS", value: "ONLINE", color: "text-sys-green" },
 		{ label: "PROJECT", value: STATUS.currentProject, color: "text-sys-text" },
-		{ label: "FOCUS", value: STATUS.currentFocus, color: "text-sys-text" },
 		{
 			label: "LAST DEPLOY",
 			value: latestRelease

@@ -48,5 +48,4 @@ export const ORGANIZATIONS = [
 
 export const STATUS = {
 	currentProject: "smyile",
-	currentFocus: "system interface redesign",
 } as const

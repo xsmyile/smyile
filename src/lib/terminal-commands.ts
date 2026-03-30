@@ -8,6 +8,8 @@ export type OutputLine = {
 	image?: string
 }
 
+export const ALLOWED_IMAGES = new Set(["/claude.png"])
+
 export type TerminalContext = {
 	user: GitHubUser | null
 	totalStars: number

@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useUptime } from "../../hooks/use-uptime"
 import type { GitHubEvent, GitHubUser } from "../../lib/github-api"
-import { executeCommand, getWelcomeMessage, type OutputLine } from "../../lib/terminal-commands"
+import {
+	ALLOWED_IMAGES,
+	executeCommand,
+	getWelcomeMessage,
+	type OutputLine,
+} from "../../lib/terminal-commands"
 import { getVisitorId } from "../../lib/visitor-id"
 import { ModulePanel } from "../module-panel"
 
@@ -106,7 +111,7 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 							</div>
 						)}
 						{entry.output.map((line, j) =>
-							line.image ? (
+							line.image && ALLOWED_IMAGES.has(line.image) ? (
 								<img
 									// biome-ignore lint/suspicious/noArrayIndexKey: output lines are static per entry
 									key={j}
@@ -139,6 +144,7 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 						onKeyDown={handleKeyDown}
 						onFocus={() => setFocused(true)}
 						onBlur={() => setFocused(false)}
+						maxLength={200}
 						className="absolute inset-0 z-10 w-full bg-transparent text-transparent caret-transparent outline-none"
 						spellCheck={false}
 						autoComplete="off"

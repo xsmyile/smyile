@@ -22,12 +22,18 @@ function getFingerprint(): string {
 }
 
 export function getVisitorId(): string {
-	const stored = sessionStorage.getItem("smyile_visitor_id")
-	if (stored) return stored
+	try {
+		const stored = sessionStorage.getItem("smyile_visitor_id")
+		if (stored) return stored
 
-	const fingerprint = getFingerprint()
-	const hash = hashCode(fingerprint)
-	const id = hash.toString(16).toUpperCase().padStart(8, "0").slice(0, 8)
-	sessionStorage.setItem("smyile_visitor_id", id)
-	return id
+		const fingerprint = getFingerprint()
+		const hash = hashCode(fingerprint)
+		const id = hash.toString(16).toUpperCase().padStart(8, "0").slice(0, 8)
+		sessionStorage.setItem("smyile_visitor_id", id)
+		return id
+	} catch {
+		const fingerprint = getFingerprint()
+		const hash = hashCode(fingerprint)
+		return hash.toString(16).toUpperCase().padStart(8, "0").slice(0, 8)
+	}
 }

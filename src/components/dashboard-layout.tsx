@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { useState } from "react"
+import { ChevronLeft, ChevronRight, X } from "lucide-react"
+import { useEffect, useState } from "react"
 import { useBootSequence } from "../hooks/use-boot-sequence"
 import { useGitHub } from "../hooks/use-github"
 import { useMediaQuery } from "../hooks/use-media-query"
@@ -19,12 +19,52 @@ const DRAWER_SPRING = { type: "spring", damping: 26, stiffness: 220 } as const
 
 const GLASS = "border-[#1a1a1a] bg-[rgba(8,8,12,0.65)] backdrop-blur-[4px]"
 
+type DrawerSide = "left" | "right" | null
+
+function DrawerToggle({
+	side,
+	active,
+	onToggle,
+}: {
+	side: "left" | "right"
+	active: boolean
+	onToggle: () => void
+}) {
+	const Icon = active ? X : side === "left" ? ChevronLeft : ChevronRight
+
+	return (
+		<motion.button
+			type="button"
+			layout
+			aria-label={active ? `Close ${side} panel` : `Open ${side} panel`}
+			onClick={onToggle}
+			className="rounded-full p-1.5 transition-colors hover:bg-white/5"
+		>
+			<AnimatePresence mode="wait" initial={false}>
+				<motion.span
+					key={active ? "close" : side}
+					initial={{ rotate: -90, opacity: 0 }}
+					animate={{ rotate: 0, opacity: 1 }}
+					exit={{ rotate: 90, opacity: 0 }}
+					transition={{ duration: 0.15 }}
+					className="block"
+				>
+					<Icon className="h-4 w-4 text-sys-accent" />
+				</motion.span>
+			</AnimatePresence>
+		</motion.button>
+	)
+}
+
 export function DashboardLayout() {
 	const { phase, visibleLogs, skip } = useBootSequence()
 	const github = useGitHub()
 	const isDesktop = useMediaQuery("(min-width: 1024px)")
-	const [leftOpen, setLeftOpen] = useState(false)
-	const [rightOpen, setRightOpen] = useState(false)
+	const [drawer, setDrawer] = useState<DrawerSide>(null)
+
+	useEffect(() => {
+		if (isDesktop) setDrawer(null)
+	}, [isDesktop])
 
 	const leftContent = (baseDelay: number) => (
 		<>
@@ -68,7 +108,7 @@ export function DashboardLayout() {
 
 				{/* Left drawer (mobile only) */}
 				<AnimatePresence>
-					{leftOpen && (
+					{drawer === "left" && (
 						<>
 							<motion.div
 								key="left-backdrop"
@@ -77,7 +117,7 @@ export function DashboardLayout() {
 								exit={{ opacity: 0 }}
 								transition={{ duration: 0.2 }}
 								className="fixed inset-0 z-40 bg-black/20 lg:hidden"
-								onClick={() => setLeftOpen(false)}
+								onClick={() => setDrawer(null)}
 							/>
 							<motion.aside
 								key="left-drawer"
@@ -95,7 +135,7 @@ export function DashboardLayout() {
 
 				{/* Right drawer (mobile only) */}
 				<AnimatePresence>
-					{rightOpen && (
+					{drawer === "right" && (
 						<>
 							<motion.div
 								key="right-backdrop"
@@ -104,7 +144,7 @@ export function DashboardLayout() {
 								exit={{ opacity: 0 }}
 								transition={{ duration: 0.2 }}
 								className="fixed inset-0 z-40 bg-black/20 lg:hidden"
-								onClick={() => setRightOpen(false)}
+								onClick={() => setDrawer(null)}
 							/>
 							<motion.aside
 								key="right-drawer"
@@ -124,26 +164,20 @@ export function DashboardLayout() {
 				<div
 					className={`fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border px-3 py-2 lg:hidden ${GLASS}`}
 				>
-					<button
-						type="button"
-						aria-label="Toggle left panel"
-						onClick={() => setLeftOpen((v) => !v)}
-						className="rounded-full p-1.5 transition-colors hover:bg-white/5"
-					>
-						<ChevronLeft className="h-4 w-4 text-sys-accent" />
-					</button>
-					<button
-						type="button"
-						aria-label="Toggle right panel"
-						onClick={() => setRightOpen((v) => !v)}
-						className="rounded-full p-1.5 transition-colors hover:bg-white/5"
-					>
-						<ChevronRight className="h-4 w-4 text-sys-accent" />
-					</button>
+					<DrawerToggle
+						side="left"
+						active={drawer === "left"}
+						onToggle={() => setDrawer((d) => (d === "left" ? null : "left"))}
+					/>
+					<DrawerToggle
+						side="right"
+						active={drawer === "right"}
+						onToggle={() => setDrawer((d) => (d === "right" ? null : "right"))}
+					/>
 				</div>
 
-					<TickerStrip events={github.events} />
-				</div>
-			</>
-		)
+				<TickerStrip events={github.events} />
+			</div>
+		</>
+	)
 	}

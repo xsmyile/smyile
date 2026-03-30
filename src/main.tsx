@@ -1,6 +1,7 @@
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
+import { StaleReloadBoundary } from "./components/stale-reload-boundary"
 import "./styles.css"
 import { routeTree } from "./routes/route-tree"
 
@@ -15,6 +16,8 @@ declare module "@tanstack/react-router" {
 // biome-ignore lint/style/noNonNullAssertion: root element guaranteed in index.html
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<RouterProvider router={router} />
+		<StaleReloadBoundary>
+			<RouterProvider router={router} />
+		</StaleReloadBoundary>
 	</StrictMode>,
 )

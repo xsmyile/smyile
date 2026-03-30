@@ -1,16 +1,39 @@
-import { GITHUB_USERNAME } from "./constants"
+import { GITHUB_USERNAME, SITE_VERSION } from "./constants"
 
 const BASE_URL = "https://api.github.com"
 const CACHE_TTL = 5 * 60 * 1000
+const CACHE_PREFIX = `smyile_${SITE_VERSION}_`
 
 type CacheEntry<T> = {
 	data: T
 	timestamp: number
 }
 
+function prefixedKey(key: string): string {
+	return `${CACHE_PREFIX}${key}`
+}
+
+function purgeStaleVersions() {
+	try {
+		const purgedKey = `${CACHE_PREFIX}purged`
+		if (localStorage.getItem(purgedKey)) return
+		for (let i = localStorage.length - 1; i >= 0; i--) {
+			const k = localStorage.key(i)
+			if (k?.startsWith("smyile_") && !k.startsWith(CACHE_PREFIX)) {
+				localStorage.removeItem(k)
+			}
+		}
+		localStorage.setItem(purgedKey, "1")
+	} catch {
+		// localStorage unavailable
+	}
+}
+
+purgeStaleVersions()
+
 function getCached<T>(key: string): T | null {
 	try {
-		const raw = localStorage.getItem(key)
+		const raw = localStorage.getItem(prefixedKey(key))
 		if (!raw) return null
 		const entry: CacheEntry<T> = JSON.parse(raw)
 		if (Date.now() - entry.timestamp < CACHE_TTL) return entry.data
@@ -22,7 +45,7 @@ function getCached<T>(key: string): T | null {
 
 function getStaleCached<T>(key: string): T | null {
 	try {
-		const raw = localStorage.getItem(key)
+		const raw = localStorage.getItem(prefixedKey(key))
 		if (!raw) return null
 		const entry: CacheEntry<T> = JSON.parse(raw)
 		return entry.data
@@ -34,7 +57,7 @@ function getStaleCached<T>(key: string): T | null {
 function setCache<T>(key: string, data: T) {
 	try {
 		const entry: CacheEntry<T> = { data, timestamp: Date.now() }
-		localStorage.setItem(key, JSON.stringify(entry))
+		localStorage.setItem(prefixedKey(key), JSON.stringify(entry))
 	} catch {
 		// localStorage full or unavailable
 	}
@@ -44,8 +67,8 @@ async function fetchWithCache<T>(
 	endpoint: string,
 	cacheKey: string,
 ): Promise<{ data: T; cached: boolean }> {
-	const cached = getCached<T>(cacheKey)
-	if (cached) return { data: cached, cached: true }
+	const hit = getCached<T>(cacheKey)
+	if (hit) return { data: hit, cached: true }
 
 	try {
 		const response = await fetch(`${BASE_URL}${endpoint}`, {

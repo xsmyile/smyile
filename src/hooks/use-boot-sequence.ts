@@ -55,7 +55,8 @@ export function useBootSequence() {
 		let readyTimeout: ReturnType<typeof setTimeout>
 		const interval = setInterval(() => {
 			if (index < BOOT_LOGS.length) {
-				setVisibleLogs((prev) => [...prev, BOOT_LOGS[index]])
+				const log = BOOT_LOGS[index]
+				if (log) setVisibleLogs((prev) => [...prev, log])
 				index++
 			} else {
 				clearInterval(interval)

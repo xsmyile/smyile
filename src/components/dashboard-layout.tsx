@@ -67,6 +67,13 @@ export function DashboardLayout() {
 		if (isDesktop) setDrawer(null)
 	}, [isDesktop])
 
+	useEffect(() => {
+		document.body.style.overflow = drawer ? "hidden" : ""
+		return () => {
+			document.body.style.overflow = ""
+		}
+	}, [drawer])
+
 	const leftContent = (baseDelay: number) => (
 		<>
 			<GithubStats

@@ -68,11 +68,11 @@ export function DashboardLayout() {
 	}, [isDesktop])
 
 	useEffect(() => {
-		document.body.style.overflow = drawer ? "hidden" : ""
+		document.body.style.overflow = phase === "booting" || drawer ? "hidden" : ""
 		return () => {
 			document.body.style.overflow = ""
 		}
-	}, [drawer])
+	}, [phase, drawer])
 
 	const leftContent = (baseDelay: number) => (
 		<>
@@ -110,7 +110,7 @@ export function DashboardLayout() {
 
 				<div className="isolate mx-auto flex min-h-screen w-full max-w-[1400px] flex-col gap-3 p-3 pt-10 md:p-4 md:pt-10 lg:grid lg:grid-cols-[280px_1fr_300px] lg:items-start lg:pt-10">
 					{isDesktop && <div className="flex flex-col gap-3">{leftContent(100)}</div>}
-					<div className="flex flex-col gap-3">
+					<div className="flex flex-col gap-3 pb-20 lg:pb-0">
 						<HeroModule delay={0} />
 						<TerminalModule
 							user={github.user}

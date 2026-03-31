@@ -140,14 +140,15 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 						ref={inputRef}
 						type="text"
 						value={input}
-						onChange={(e) => setInput(e.target.value)}
+						onChange={(e) => setInput(e.target.value.toLowerCase())}
 						onKeyDown={handleKeyDown}
 						onFocus={() => setFocused(true)}
 						onBlur={() => setFocused(false)}
 						maxLength={200}
-						className="absolute inset-0 z-10 w-full bg-transparent text-transparent caret-transparent outline-none"
+						className="absolute inset-0 z-10 w-full bg-transparent text-base text-transparent caret-transparent outline-none"
 						spellCheck={false}
 						autoComplete="off"
+						autoCapitalize="none"
 					/>
 					<div aria-hidden="true">
 						<span className="text-sys-green">{prompt}</span>

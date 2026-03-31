@@ -116,6 +116,9 @@ export function FlickeringGrid({
 		let lastTime = 0
 		const animate = (time: number) => {
 			if (!isInView) return
+			if (!lastTime) {
+				lastTime = time
+			}
 			const deltaTime = (time - lastTime) / 1000
 			lastTime = time
 			updateSquares(gridParams.squares, deltaTime)

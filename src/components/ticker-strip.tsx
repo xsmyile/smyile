@@ -42,18 +42,22 @@ type Props = {
 
 export function TickerStrip({ events }: Props) {
 	const items = useMemo(() => buildItems(events), [events])
-	const separator = "\u00A0\u00A0///\u00A0\u00A0"
-	const text = items.join(separator)
-	const repeated = `${text}${separator}`
+
+	const content = items.flatMap((item) => [
+		<span key={`t-${item}`}>{item}</span>,
+		<span key={`s-${item}`} className="text-sys-accent">
+			{"\u00A0\u00A0//\u00A0\u00A0"}
+		</span>,
+	])
 
 	return (
-		<div className="ticker-strip fixed inset-x-0 top-0 z-30 h-7 overflow-hidden bg-[rgba(8,8,12,0.65)] backdrop-blur-[4px]">
+		<div className="ticker-strip fixed inset-x-0 top-0 z-30 h-8 overflow-hidden bg-[rgba(8,8,12,0.65)] backdrop-blur-[4px]">
 			<div className="ticker-scroll flex h-full items-center whitespace-nowrap">
-				<span className="ticker-content font-mono text-[0.7rem] tracking-wider text-sys-green">
-					{repeated}
+				<span className="ticker-content font-mono text-[0.75rem] tracking-wider text-sys-green">
+					{content}
 				</span>
-				<span className="ticker-content font-mono text-[0.7rem] tracking-wider text-sys-green">
-					{repeated}
+				<span className="ticker-content font-mono text-[0.75rem] tracking-wider text-sys-green">
+					{content}
 				</span>
 			</div>
 		</div>

@@ -20,7 +20,7 @@ const fadeUp = {
 	visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
 }
 
-const PLATFORM_HOSTS: Record<string, string> = {
+const PLATFORM_HOSTS: Record<(typeof ORGANIZATIONS)[number]["platform"], string> = {
 	github: "github.com",
 	huggingface: "huggingface.co",
 }

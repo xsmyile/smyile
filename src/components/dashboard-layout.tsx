@@ -109,9 +109,9 @@ export function DashboardLayout() {
 				<div className="scanlines relative min-h-screen w-full">
 					<CyberBackground />
 
-					<div className="isolate mx-auto flex min-h-screen w-full max-w-[1600px] flex-col gap-4 p-3 pt-10 md:p-4 md:pt-10 lg:grid lg:grid-cols-[280px_1fr_300px] lg:items-start lg:gap-5 lg:pt-10">
-						{isDesktop && <div className="flex flex-col gap-4">{leftContent(100)}</div>}
-						<div className="flex min-h-0 flex-1 flex-col gap-4 pb-20 lg:pb-0">
+					<div className="isolate mx-auto flex min-h-screen w-full max-w-[1400px] flex-col gap-3 p-3 pt-10 md:p-4 md:pt-10 lg:grid lg:grid-cols-[280px_1fr_300px] lg:items-start lg:pt-10">
+						{isDesktop && <div className="flex flex-col gap-3">{leftContent(100)}</div>}
+						<div className="flex min-h-0 flex-1 flex-col gap-3 pb-20 lg:pb-0">
 							<HeroModule delay={0} />
 							<TerminalModule
 								user={github.user}
@@ -120,7 +120,7 @@ export function DashboardLayout() {
 								delay={200}
 							/>
 						</div>
-						{isDesktop && <div className="flex flex-col gap-4">{rightContent(50)}</div>}
+						{isDesktop && <div className="flex flex-col gap-3">{rightContent(50)}</div>}
 					</div>
 
 					{/* Left drawer (mobile only) */}

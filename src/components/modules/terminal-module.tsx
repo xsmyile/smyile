@@ -97,13 +97,13 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: click-to-focus delegates to input */}
 			<div
 				ref={scrollRef}
-				className="max-h-64 overflow-y-auto font-mono text-sm"
+				className="max-h-64 overflow-y-auto overflow-x-hidden font-mono text-sm"
 				onClick={() => inputRef.current?.focus()}
 			>
 				{history.map((entry) => (
 					<div key={entry.id} className="mb-2">
 						{entry.command && (
-							<div>
+							<div className="whitespace-pre-wrap wrap-break-word">
 								<span className="text-sys-green">{prompt}</span>
 								<span className="text-sys-text-dim"> : </span>
 								<span className="text-sys-accent">~$ </span>
@@ -125,7 +125,7 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 								<div
 									// biome-ignore lint/suspicious/noArrayIndexKey: output lines are static per entry
 									key={j}
-									className="whitespace-pre text-sys-text"
+									className="whitespace-pre-wrap wrap-break-word text-sys-text"
 									style={line.color ? { color: line.color } : undefined}
 								>
 									{line.text || "\u00A0"}
@@ -150,7 +150,7 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 						autoComplete="off"
 						autoCapitalize="none"
 					/>
-					<div aria-hidden="true">
+					<div aria-hidden="true" className="whitespace-pre-wrap wrap-break-word">
 						<span className="text-sys-green">{prompt}</span>
 						<span className="text-sys-text-dim"> : </span>
 						<span className="text-sys-accent">~$ </span>

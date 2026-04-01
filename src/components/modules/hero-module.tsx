@@ -20,6 +20,33 @@ const fadeUp = {
 	visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
 }
 
+const PLATFORM_HOSTS: Record<(typeof ORGANIZATIONS)[number]["platform"], string> = {
+	github: "github.com",
+	huggingface: "huggingface.co",
+}
+
+const githubOrgs = ORGANIZATIONS.filter((o) => o.platform === "github")
+const hfOrgs = ORGANIZATIONS.filter((o) => o.platform === "huggingface")
+
+function OrgLink({ org }: { org: (typeof ORGANIZATIONS)[number] }) {
+	const host = PLATFORM_HOSTS[org.platform]
+	return (
+		<a
+			href={org.url}
+			target="_blank"
+			rel="noopener noreferrer"
+			className="group flex items-center justify-between border-b border-sys-border/50 py-1.5 transition-colors"
+		>
+			<span className="font-mono text-xs tracking-[0.15em] text-sys-text transition-colors group-hover:text-sys-accent">
+				{host}/{org.name}
+			</span>
+			<span className="font-mono text-[0.8rem] tracking-wider text-sys-text-dim transition-colors group-hover:text-sys-accent">
+				→
+			</span>
+		</a>
+	)
+}
+
 export function HeroModule({ delay = 0 }: Props) {
 	const [typed, setTyped] = useState("")
 	const [showName, setShowName] = useState(false)
@@ -137,23 +164,18 @@ export function HeroModule({ delay = 0 }: Props) {
 									<div className="mb-2 text-center font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
 										[ ORGANIZATIONS ]
 									</div>
-									<div className="flex flex-col gap-1 text-left">
-										{ORGANIZATIONS.map((org) => (
-											<a
-												key={org.name}
-												href={org.url}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="group flex items-center justify-between border-b border-sys-border/50 py-1.5 transition-colors"
-											>
-												<span className="font-mono text-xs tracking-[0.15em] text-sys-text transition-colors group-hover:text-sys-accent">
-													github.com/{org.name}
-												</span>
-												<span className="font-mono text-[0.8rem] tracking-wider text-sys-text-dim transition-colors group-hover:text-sys-accent">
-													→
-												</span>
-											</a>
+									<div className="flex flex-col text-left">
+										{githubOrgs.map((org) => (
+											<OrgLink key={org.url} org={org} />
 										))}
+										{hfOrgs.length > 0 && (
+											<>
+												<div className="my-2 border-t border-sys-border/30" />
+												{hfOrgs.map((org) => (
+													<OrgLink key={org.url} org={org} />
+												))}
+											</>
+										)}
 									</div>
 								</motion.div>
 							</motion.div>

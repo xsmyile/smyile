@@ -1,5 +1,5 @@
 export const GITHUB_USERNAME = "xsmyile"
-export const SITE_VERSION = "0.5.2"
+export const SITE_VERSION = "0.5.3"
 
 export const IDENTITY = {
 	name: "Smyile",
@@ -30,20 +30,23 @@ export const PROJECTS = [
 
 export const SOCIAL_LINKS = [
 	{ label: "GitHub", url: `https://github.com/${GITHUB_USERNAME}` },
+	{ label: "Hugging Face", url: "https://huggingface.co/smyile" },
 	{ label: "Steam", url: "https://steamcommunity.com/id/Smyile/" },
 ] as const
 
 export const SPECIALIZATIONS = [
-	{ name: "Python", color: "#00d4ff" },
-	{ name: "TypeScript", color: "#89CFF0" },
-	{ name: "Reverse Engineering", color: "#ff0080" },
 	{ name: "Systems Architecture", color: "#00ff88" },
-	{ name: "AI & Machine Learning", color: "#ffaa00" },
+	{ name: "Reverse Engineering", color: "#ff0080" },
+	{ name: "LLM Fine-Tuning", color: "#c084fc" },
+	{ name: "Neural Architecture Design", color: "#38bdf8" },
+	{ name: "Model Training & Optimization", color: "#f472b6" },
 ] as const
 
 export const ORGANIZATIONS = [
-	{ name: "radonforge", url: "https://github.com/radonforge" },
-	{ name: "rustmailapp", url: "https://github.com/rustmailapp" },
+	{ name: "obliolabs", url: "https://github.com/obliolabs", platform: "github" },
+	{ name: "radonforge", url: "https://github.com/radonforge", platform: "github" },
+	{ name: "rustmailapp", url: "https://github.com/rustmailapp", platform: "github" },
+	{ name: "obliolabs", url: "https://huggingface.co/obliolabs", platform: "huggingface" },
 ] as const
 
 export const STATUS = {

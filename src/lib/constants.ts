@@ -34,14 +34,15 @@ export const SOCIAL_LINKS = [
 ] as const
 
 export const SPECIALIZATIONS = [
-	{ name: "Python", color: "#00d4ff" },
-	{ name: "TypeScript", color: "#89CFF0" },
-	{ name: "Reverse Engineering", color: "#ff0080" },
 	{ name: "Systems Architecture", color: "#00ff88" },
-	{ name: "AI & Machine Learning", color: "#ffaa00" },
+	{ name: "Reverse Engineering", color: "#ff0080" },
+	{ name: "LLM Fine-Tuning", color: "#c084fc" },
+	{ name: "Neural Architecture Design", color: "#38bdf8" },
+	{ name: "Model Training & Optimization", color: "#f472b6" },
 ] as const
 
 export const ORGANIZATIONS = [
+	{ name: "obliolabs", url: "https://github.com/obliolabs" },
 	{ name: "radonforge", url: "https://github.com/radonforge" },
 	{ name: "rustmailapp", url: "https://github.com/rustmailapp" },
 ] as const

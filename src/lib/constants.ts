@@ -30,6 +30,7 @@ export const PROJECTS = [
 
 export const SOCIAL_LINKS = [
 	{ label: "GitHub", url: `https://github.com/${GITHUB_USERNAME}` },
+	{ label: "Hugging Face", url: "https://huggingface.co/smyile" },
 	{ label: "Steam", url: "https://steamcommunity.com/id/Smyile/" },
 ] as const
 
@@ -42,9 +43,10 @@ export const SPECIALIZATIONS = [
 ] as const
 
 export const ORGANIZATIONS = [
-	{ name: "obliolabs", url: "https://github.com/obliolabs" },
-	{ name: "radonforge", url: "https://github.com/radonforge" },
-	{ name: "rustmailapp", url: "https://github.com/rustmailapp" },
+	{ name: "obliolabs", url: "https://github.com/obliolabs", platform: "github" },
+	{ name: "radonforge", url: "https://github.com/radonforge", platform: "github" },
+	{ name: "rustmailapp", url: "https://github.com/rustmailapp", platform: "github" },
+	{ name: "obliolabs", url: "https://huggingface.co/obliolabs", platform: "huggingface" },
 ] as const
 
 export const STATUS = {

@@ -10,21 +10,21 @@ export const IDENTITY = {
 export const PROJECTS = [
 	{
 		name: "RUSTMAIL",
-		url: "https://github.com/rustmailapp/rustmail",
+		url: "https://rustmail.app",
 		description: "Self-hosted SMTP mail catcher with web UI",
 		repo: "rustmailapp/rustmail",
+	},
+	{
+		name: "MIZUHUB",
+		url: "https://mizuhub.com",
+		description: "Smart watering system",
+		repo: "mizu-systems/mizu-web",
 	},
 	{
 		name: "OVERBOT",
 		url: "https://overbot.net",
 		description: "Discord bot for Overwatch 2 stats and rankings",
 		repo: "xsmyile/overbot",
-	},
-	{
-		name: "MIZU",
-		url: "https://mizu.davidet.com",
-		description: "Smart watering system",
-		repo: "mizu-systems/mizu-web",
 	},
 ] as const
 
@@ -38,7 +38,6 @@ export const SPECIALIZATIONS = [
 	{ name: "Systems Architecture", color: "#00ff88" },
 	{ name: "Reverse Engineering", color: "#ff0080" },
 	{ name: "LLM Fine-Tuning", color: "#c084fc" },
-	{ name: "Neural Architecture Design", color: "#38bdf8" },
 	{ name: "Model Training & Optimization", color: "#f472b6" },
 ] as const
 

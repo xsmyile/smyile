@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
-import { IDENTITY, ORGANIZATIONS, PROJECTS, SOCIAL_LINKS } from "../../lib/constants"
+import { IDENTITY, PROJECTS, SOCIAL_LINKS } from "../../lib/constants"
 import { ModulePanel } from "../module-panel"
 
 type Props = {
@@ -18,33 +18,6 @@ const stagger = {
 const fadeUp = {
 	hidden: { opacity: 0, y: 12 },
 	visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
-}
-
-const PLATFORM_HOSTS: Record<(typeof ORGANIZATIONS)[number]["platform"], string> = {
-	github: "github.com",
-	huggingface: "huggingface.co",
-}
-
-const githubOrgs = ORGANIZATIONS.filter((o) => o.platform === "github")
-const hfOrgs = ORGANIZATIONS.filter((o) => o.platform === "huggingface")
-
-function OrgLink({ org }: { org: (typeof ORGANIZATIONS)[number] }) {
-	const host = PLATFORM_HOSTS[org.platform]
-	return (
-		<a
-			href={org.url}
-			target="_blank"
-			rel="noopener noreferrer"
-			className="group flex items-center justify-between border-b border-sys-border/50 py-1.5 transition-colors"
-		>
-			<span className="font-mono text-xs tracking-[0.15em] text-sys-text transition-colors group-hover:text-sys-accent">
-				{host}/{org.name}
-			</span>
-			<span className="font-mono text-[0.8rem] tracking-wider text-sys-text-dim transition-colors group-hover:text-sys-accent">
-				→
-			</span>
-		</a>
-	)
 }
 
 export function HeroModule({ delay = 0 }: Props) {
@@ -156,28 +129,17 @@ export function HeroModule({ delay = 0 }: Props) {
 												</span>
 											</a>
 										))}
+										<div className="flex items-center justify-between border-b border-sys-border/50 py-1.5">
+											<span className="font-mono text-xs tracking-[0.15em] text-sys-text-dim">
+												████████
+											</span>
+											<span className="font-mono text-[0.8rem] tracking-wider text-sys-magenta">
+												CLASSIFIED
+											</span>
+										</div>
 									</div>
 								</motion.div>
 
-								{/* Organizations */}
-								<motion.div variants={fadeUp} className="mt-2 w-full max-w-md">
-									<div className="mb-2 text-center font-mono text-[0.8rem] tracking-[0.15em] text-sys-text-dim">
-										[ ORGANIZATIONS ]
-									</div>
-									<div className="flex flex-col text-left">
-										{githubOrgs.map((org) => (
-											<OrgLink key={org.url} org={org} />
-										))}
-										{hfOrgs.length > 0 && (
-											<>
-												<div className="my-2 border-t border-sys-border/30" />
-												{hfOrgs.map((org) => (
-													<OrgLink key={org.url} org={org} />
-												))}
-											</>
-										)}
-									</div>
-								</motion.div>
 							</motion.div>
 						</motion.div>
 					)}

@@ -9,6 +9,7 @@ import { CyberBackground } from "./cyber-background"
 import { ActivityStream } from "./modules/activity-stream"
 import { GithubStats } from "./modules/github-stats"
 import { HeroModule } from "./modules/hero-module"
+import { OrganizationsModule } from "./modules/organizations-module"
 import { SpecsModule } from "./modules/specs-module"
 import { StatusModule } from "./modules/status-module"
 import { SystemLog } from "./modules/system-log"
@@ -96,6 +97,7 @@ export function DashboardLayout() {
 				delay={baseDelay + 100}
 			/>
 			<SpecsModule delay={baseDelay + 200} />
+			<OrganizationsModule delay={baseDelay + 300} />
 		</>
 	)
 

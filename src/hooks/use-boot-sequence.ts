@@ -8,10 +8,12 @@ type BootLog = {
 	message: string
 }
 
+const MODULE_COUNT = 8
+
 const BOOT_LOGS: BootLog[] = [
 	{ time: "00:00.0", module: "CORE", message: "initializing system..." },
 	{ time: "00:00.1", module: "THEME", message: "loading cyberpunk interface" },
-	{ time: "00:00.2", module: "MODULES", message: "mounting 7 modules..." },
+	{ time: "00:00.2", module: "MODULES", message: `mounting ${MODULE_COUNT} modules...` },
 	{ time: "00:00.4", module: "GITHUB", message: "connecting to api.github.com..." },
 	{ time: "00:00.6", module: "STATUS", message: "runtime checks passed" },
 	{ time: "00:00.8", module: "RENDER", message: "compositing dashboard..." },

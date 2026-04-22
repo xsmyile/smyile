@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { ORGANIZATIONS } from "../lib/constants"
 import type { GitHubEvent, GitHubRelease, GitHubRepo, GitHubUser } from "../lib/github-api"
 import {
@@ -22,6 +22,10 @@ type GitHubData = {
 
 const FILTERED_EVENTS = new Set(["WatchEvent", "IssueCommentEvent"])
 
+const GITHUB_ORG_NAMES = Array.from(
+	new Set(ORGANIZATIONS.filter((o) => o.platform === "github").map((o) => o.name)),
+)
+
 function filterEvents(events: GitHubEvent[]): GitHubEvent[] {
 	return events.filter((e) => !FILTERED_EVENTS.has(e.type))
 }
@@ -42,20 +46,36 @@ export function useGitHub(): GitHubData {
 		error: null,
 	})
 
-	const fetchAll = useCallback(async () => {
-		setState((prev) => ({ ...prev, loading: true, error: null }))
+	useEffect(() => {
+		let cancelled = false
 
-		try {
-			const orgRepoFetches = ORGANIZATIONS.map((org) => fetchOrgRepos(org.name))
+		async function run() {
+			const orgRepoFetches = GITHUB_ORG_NAMES.map((name) => fetchOrgRepos(name))
 
-			const [userResult, userReposResult, eventsResult, releaseResult, ...orgResults] =
-				await Promise.allSettled([
-					fetchUserProfile(),
-					fetchUserRepos(),
-					fetchUserEvents(),
-					fetchLatestRelease(),
-					...orgRepoFetches,
-				])
+			const results = await Promise.allSettled([
+				fetchUserProfile(),
+				fetchUserRepos(),
+				fetchUserEvents(),
+				fetchLatestRelease(),
+				...orgRepoFetches,
+			])
+
+			if (cancelled) return
+
+			const [userResult, userReposResult, eventsResult, releaseResult, ...orgResults] = results
+
+			const criticalFailure =
+				userResult.status === "rejected" ? userResult.reason : (userReposResult.status === "rejected" ? userReposResult.reason : null)
+
+			if (criticalFailure) {
+				setState((prev) => ({
+					...prev,
+					loading: false,
+					error:
+						criticalFailure instanceof Error ? criticalFailure.message : "GitHub API unavailable",
+				}))
+				return
+			}
 
 			const user = userResult.status === "fulfilled" ? userResult.value.data : null
 			const userRepos = userReposResult.status === "fulfilled" ? userReposResult.value.data : []
@@ -70,34 +90,26 @@ export function useGitHub(): GitHubData {
 				}
 			}
 
-			const anyCached =
-				(userResult.status === "fulfilled" && userResult.value.cached) ||
-				(eventsResult.status === "fulfilled" && eventsResult.value.cached)
-
-			const allRepos = allRepoSets.flat()
+			const cached = results.some((r) => r.status === "fulfilled" && r.value.cached)
 
 			setState({
 				user,
 				totalStars: sumStars(allRepoSets),
-				repos: allRepos,
+				repos: allRepoSets.flat(),
 				events,
 				latestRelease: releases[0] ?? null,
 				loading: false,
-				cached: anyCached,
+				cached,
 				error: null,
 			})
-		} catch (err) {
-			setState((prev) => ({
-				...prev,
-				loading: false,
-				error: err instanceof Error ? err.message : "Unknown error",
-			}))
+		}
+
+		run()
+
+		return () => {
+			cancelled = true
 		}
 	}, [])
-
-	useEffect(() => {
-		fetchAll()
-	}, [fetchAll])
 
 	return state
 }

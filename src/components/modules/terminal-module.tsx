@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useUptime } from "../../hooks/use-uptime"
+import { getUptime } from "../../hooks/use-uptime"
 import type { GitHubEvent, GitHubUser } from "../../lib/github-api"
 import {
 	ALLOWED_IMAGES,
@@ -36,7 +36,6 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const inputRef = useRef<HTMLInputElement>(null)
 	const entryIdRef = useRef(0)
-	const uptime = useUptime()
 	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll on history change
 	useEffect(() => {
 		if (scrollRef.current) {
@@ -49,7 +48,7 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 		const trimmed = input.trim()
 		if (!trimmed) return
 
-		const ctx = { user, totalStars, events, uptime }
+		const ctx = { user, totalStars, events, uptime: getUptime() }
 		const result = executeCommand(trimmed, ctx)
 
 		if (result.clear) {

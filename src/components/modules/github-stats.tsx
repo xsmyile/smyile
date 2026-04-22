@@ -16,8 +16,8 @@ function AnimatedNumber({ target, duration = 1200 }: { target: number; duration?
 	const fromRef = useRef(0)
 
 	useEffect(() => {
-		if (target === 0) return
 		const from = fromRef.current
+		if (target === from) return
 		const start = performance.now()
 		let raf: number
 

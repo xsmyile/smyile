@@ -31,24 +31,13 @@ function purgeStaleVersions() {
 
 purgeStaleVersions()
 
-function getCached<T>(key: string): T | null {
+function readCache<T>(key: string, { allowStale }: { allowStale: boolean }): T | null {
 	try {
 		const raw = localStorage.getItem(prefixedKey(key))
 		if (!raw) return null
 		const entry: CacheEntry<T> = JSON.parse(raw)
-		if (Date.now() - entry.timestamp < CACHE_TTL) return entry.data
+		if (allowStale || Date.now() - entry.timestamp < CACHE_TTL) return entry.data
 		return null
-	} catch {
-		return null
-	}
-}
-
-function getStaleCached<T>(key: string): T | null {
-	try {
-		const raw = localStorage.getItem(prefixedKey(key))
-		if (!raw) return null
-		const entry: CacheEntry<T> = JSON.parse(raw)
-		return entry.data
 	} catch {
 		return null
 	}
@@ -67,7 +56,7 @@ async function fetchWithCache<T>(
 	endpoint: string,
 	cacheKey: string,
 ): Promise<{ data: T; cached: boolean }> {
-	const hit = getCached<T>(cacheKey)
+	const hit = readCache<T>(cacheKey, { allowStale: false })
 	if (hit) return { data: hit, cached: true }
 
 	try {
@@ -76,7 +65,7 @@ async function fetchWithCache<T>(
 		})
 
 		if (!response.ok) {
-			const stale = getStaleCached<T>(cacheKey)
+			const stale = readCache<T>(cacheKey, { allowStale: true })
 			if (stale) return { data: stale, cached: true }
 			throw new Error(`GitHub API ${response.status}`)
 		}
@@ -86,7 +75,7 @@ async function fetchWithCache<T>(
 		try {
 			data = JSON.parse(text)
 		} catch {
-			const stale = getStaleCached<T>(cacheKey)
+			const stale = readCache<T>(cacheKey, { allowStale: true })
 			if (stale) return { data: stale, cached: true }
 			throw new Error("GitHub API returned non-JSON response")
 		}
@@ -94,7 +83,7 @@ async function fetchWithCache<T>(
 		setCache(cacheKey, data)
 		return { data, cached: false }
 	} catch (err) {
-		const stale = getStaleCached<T>(cacheKey)
+		const stale = readCache<T>(cacheKey, { allowStale: true })
 		if (stale) return { data: stale, cached: true }
 		throw err instanceof Error ? err : new Error("GitHub API unavailable")
 	}

@@ -1,5 +1,5 @@
 export const GITHUB_USERNAME = "xsmyile"
-export const SITE_VERSION = "0.5.4"
+export const SITE_VERSION = __APP_VERSION__
 
 export const IDENTITY = {
 	name: "Smyile",

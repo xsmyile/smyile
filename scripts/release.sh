@@ -26,13 +26,11 @@ fi
 
 npm pkg set "version=${VERSION}"
 npm install --package-lock-only
-sed -i '' "s/SITE_VERSION = \".*\"/SITE_VERSION = \"${VERSION}\"/" src/lib/constants.ts
 
 echo ""
 echo "Version updated to ${VERSION} in:"
 echo "  - package.json"
 echo "  - package-lock.json"
-echo "  - src/lib/constants.ts"
 echo ""
 echo "Next steps:"
 echo "  git add -A && git commit -m \"chore: bump version to v${VERSION}\""

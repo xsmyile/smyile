@@ -23,7 +23,7 @@ export function FlickeringGrid({
 }: FlickeringGridProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
-	const [isInView, setIsInView] = useState(false)
+	const inViewRef = useRef(false)
 	const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
 
 	const memoizedColor = useMemo(() => {
@@ -101,8 +101,9 @@ export function FlickeringGrid({
 		const ctx = canvas.getContext("2d")
 		if (!ctx) return
 
-		let animationFrameId: number
+		let animationFrameId = 0
 		let gridParams: ReturnType<typeof setupCanvas>
+		let lastTime = 0
 
 		const updateCanvasSize = () => {
 			const newWidth = width || container.clientWidth
@@ -113,12 +114,9 @@ export function FlickeringGrid({
 
 		updateCanvasSize()
 
-		let lastTime = 0
 		const animate = (time: number) => {
-			if (!isInView) return
-			if (!lastTime) {
-				lastTime = time
-			}
+			if (!inViewRef.current) return
+			if (!lastTime) lastTime = time
 			const deltaTime = (time - lastTime) / 1000
 			lastTime = time
 			updateSquares(gridParams.squares, deltaTime)
@@ -138,21 +136,24 @@ export function FlickeringGrid({
 		resizeObserver.observe(container)
 
 		const intersectionObserver = new IntersectionObserver(
-			([entry]) => setIsInView(entry.isIntersecting),
+			([entry]) => {
+				const wasInView = inViewRef.current
+				inViewRef.current = entry.isIntersecting
+				if (entry.isIntersecting && !wasInView) {
+					lastTime = 0
+					animationFrameId = requestAnimationFrame(animate)
+				}
+			},
 			{ threshold: 0 },
 		)
 		intersectionObserver.observe(canvas)
-
-		if (isInView) {
-			animationFrameId = requestAnimationFrame(animate)
-		}
 
 		return () => {
 			cancelAnimationFrame(animationFrameId)
 			resizeObserver.disconnect()
 			intersectionObserver.disconnect()
 		}
-	}, [setupCanvas, updateSquares, drawGrid, width, height, isInView])
+	}, [setupCanvas, updateSquares, drawGrid, width, height])
 
 	return (
 		<div className={`h-full w-full ${className}`} ref={containerRef}>

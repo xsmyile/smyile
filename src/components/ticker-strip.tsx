@@ -19,11 +19,19 @@ const FILLER = [
 	"PROXY CHAIN ESTABLISHED",
 ]
 
+function shuffle<T>(items: readonly T[]): T[] {
+	const out = [...items]
+	for (let i = out.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1))
+		;[out[i], out[j]] = [out[j], out[i]]
+	}
+	return out
+}
+
 function buildItems(events: GitHubEvent[]): string[] {
 	const activity = events.slice(0, 8).map(formatEventDescription)
 
-	const shuffled = [...FILLER].sort(() => Math.random() - 0.5)
-	const fillerSlice = shuffled.slice(0, Math.max(4, 8 - activity.length))
+	const fillerSlice = shuffle(FILLER).slice(0, Math.max(4, 8 - activity.length))
 
 	const merged: string[] = []
 	let ai = 0
@@ -43,9 +51,11 @@ type Props = {
 export function TickerStrip({ events }: Props) {
 	const items = useMemo(() => buildItems(events), [events])
 
-	const content = items.flatMap((item) => [
-		<span key={`t-${item}`}>{item}</span>,
-		<span key={`s-${item}`} className="text-sys-accent">
+	const content = items.flatMap((item, i) => [
+		// biome-ignore lint/suspicious/noArrayIndexKey: ticker items may repeat, index disambiguates
+		<span key={`t-${i}-${item}`}>{item}</span>,
+		// biome-ignore lint/suspicious/noArrayIndexKey: ticker items may repeat, index disambiguates
+		<span key={`s-${i}-${item}`} className="text-sys-accent">
 			{"\u00A0\u00A0//\u00A0\u00A0"}
 		</span>,
 	])

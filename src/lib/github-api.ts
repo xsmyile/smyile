@@ -125,7 +125,7 @@ export async function fetchUserProfile() {
 
 export async function fetchUserEvents(page = 1) {
 	return fetchWithCache<GitHubEvent[]>(
-		`/users/${GITHUB_USERNAME}/events/public?per_page=30&page=${page}`,
+		`/users/${GITHUB_USERNAME}/events/public?per_page=100&page=${page}`,
 		`gh_events_${page}`,
 	)
 }

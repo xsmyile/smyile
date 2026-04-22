@@ -64,19 +64,6 @@ export function useGitHub(): GitHubData {
 
 			const [userResult, userReposResult, eventsResult, releaseResult, ...orgResults] = results
 
-			const criticalFailure =
-				userResult.status === "rejected" ? userResult.reason : (userReposResult.status === "rejected" ? userReposResult.reason : null)
-
-			if (criticalFailure) {
-				setState((prev) => ({
-					...prev,
-					loading: false,
-					error:
-						criticalFailure instanceof Error ? criticalFailure.message : "GitHub API unavailable",
-				}))
-				return
-			}
-
 			const user = userResult.status === "fulfilled" ? userResult.value.data : null
 			const userRepos = userReposResult.status === "fulfilled" ? userReposResult.value.data : []
 			const events =
@@ -92,6 +79,18 @@ export function useGitHub(): GitHubData {
 
 			const cached = results.some((r) => r.status === "fulfilled" && r.value.cached)
 
+			const criticalFailure =
+				userResult.status === "rejected"
+					? userResult.reason
+					: userReposResult.status === "rejected"
+						? userReposResult.reason
+						: null
+			const error = criticalFailure
+				? criticalFailure instanceof Error
+					? criticalFailure.message
+					: "GitHub API unavailable"
+				: null
+
 			setState({
 				user,
 				totalStars: sumStars(allRepoSets),
@@ -100,7 +99,7 @@ export function useGitHub(): GitHubData {
 				latestRelease: releases[0] ?? null,
 				loading: false,
 				cached,
-				error: null,
+				error,
 			})
 		}
 

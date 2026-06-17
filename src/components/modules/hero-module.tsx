@@ -139,7 +139,6 @@ export function HeroModule({ delay = 0 }: Props) {
 										</div>
 									</div>
 								</motion.div>
-
 							</motion.div>
 						</motion.div>
 					)}

@@ -9,6 +9,12 @@ export const IDENTITY = {
 
 export const PROJECTS = [
 	{
+		name: "SISSY",
+		url: "https://github.com/xsmyile/sissy",
+		description: "Menubar cat tracking AI-coding token spend",
+		repo: "xsmyile/sissy",
+	},
+	{
 		name: "RUSTMAIL",
 		url: "https://rustmail.app",
 		description: "Self-hosted SMTP mail catcher with web UI",
@@ -42,10 +48,20 @@ export const SPECIALIZATIONS = [
 ] as const
 
 export const ORGANIZATIONS = [
-	{ name: "obliolabs", url: "https://github.com/obliolabs", platform: "github" },
-	{ name: "radonforge", url: "https://github.com/radonforge", platform: "github" },
-	{ name: "rustmailapp", url: "https://github.com/rustmailapp", platform: "github" },
-	{ name: "obliolabs", url: "https://huggingface.co/obliolabs", platform: "huggingface" },
+	{ name: "obliolabs", url: "https://github.com/obliolabs", platform: "github", showcase: true },
+	{ name: "radonforge", url: "https://github.com/radonforge", platform: "github", showcase: true },
+	{
+		name: "rustmailapp",
+		url: "https://github.com/rustmailapp",
+		platform: "github",
+		showcase: false,
+	},
+	{
+		name: "obliolabs",
+		url: "https://huggingface.co/obliolabs",
+		platform: "huggingface",
+		showcase: true,
+	},
 ] as const
 
 export const STATUS = {

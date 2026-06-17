@@ -33,7 +33,7 @@ export function OrganizationsModule({ delay = 0 }: Props) {
 	return (
 		<ModulePanel title="ORGANIZATIONS" status="ONLINE" delay={delay}>
 			<div className="flex flex-col text-left">
-				{ORGANIZATIONS.map((org) => (
+				{ORGANIZATIONS.filter((org) => org.showcase).map((org) => (
 					<OrgLink key={org.url} org={org} />
 				))}
 			</div>

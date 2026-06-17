@@ -11,7 +11,7 @@ export const PROJECTS = [
 	{
 		name: "SISSY",
 		url: "https://github.com/xsmyile/sissy",
-		description: "Menubar cat tracking AI-coding token spend",
+		description: "macOS menubar cat tracking AI-coding token spend",
 		repo: "xsmyile/sissy",
 	},
 	{

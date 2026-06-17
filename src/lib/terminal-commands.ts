@@ -8,7 +8,7 @@ export type OutputLine = {
 	image?: string
 }
 
-export const ALLOWED_IMAGES = new Set(["/claude.png"])
+export const ALLOWED_IMAGES = new Set(["/sissy.png"])
 
 export type TerminalContext = {
 	user: GitHubUser | null
@@ -165,7 +165,7 @@ const COMMANDS: Record<string, CommandHandler> = {
 		]
 	},
 
-	claude: () => [{ text: "", image: "/claude.png" }],
+	sissy: () => [{ text: "", image: "/sissy.png" }],
 
 	secret: () => [
 		{ text: "ACCESS GRANTED", color: "var(--color-sys-green)" },

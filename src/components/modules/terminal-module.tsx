@@ -115,10 +115,9 @@ export function TerminalModule({ user, totalStars, events, delay = 0 }: Props) {
 									// biome-ignore lint/suspicious/noArrayIndexKey: output lines are static per entry
 									key={j}
 									src={line.image}
-									alt="Claude pixel art logo"
+									alt="Sissy mascot"
 									className="pointer-events-none my-2 h-24 w-auto select-none"
 									draggable={false}
-									style={{ imageRendering: "pixelated" }}
 								/>
 							) : (
 								<div

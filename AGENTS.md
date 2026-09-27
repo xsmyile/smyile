@@ -45,7 +45,7 @@ src/
 ├── routes/route-tree.ts        # TanStack Router tree (single index route)
 ├── components/
 │   ├── signal-page.tsx         # Page shell: boot, background, ticker, hero, sections, Sissy pet
-│   ├── signal-hero.tsx         # whoami reveal, name, readout (Rome time, last push, active repo)
+│   ├── signal-hero.tsx         # whoami reveal, name, readout (last push, active repo)
 │   ├── terminal-window.tsx     # Interactive terminal (history, Tab completion, touch-only chips)
 │   ├── terminal-fullscreen.tsx # Edge-to-edge TTY fullscreen terminal (⤢, Ctrl+K, /#terminal)
 │   ├── signal-sections.tsx     # Projects list + network tree
@@ -55,7 +55,6 @@ src/
 ├── hooks/
 │   ├── use-github.ts           # Profile, events (owner-filtered), star totals
 │   ├── use-boot-sequence.ts    # Boot animation timing + state
-│   ├── use-owner-clock.ts      # Rome clock (HH:MM) for readouts
 │   ├── use-terminal-session.ts # Shared terminal history, input and key handling
 │   └── use-uptime.ts           # Session timer
 └── lib/

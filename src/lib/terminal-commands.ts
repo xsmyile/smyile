@@ -241,7 +241,6 @@ const COMMANDS: Record<string, CommandHandler> = {
 		{ text: `  stars:   ${ctx.totalStars}`, color: STARS },
 		{ text: `  skills:  ${SPECIALIZATIONS.join(", ")}` },
 		{ text: `  orgs:    ${NETWORK.map((n) => n.id).join(", ")}` },
-		{ text: `  tz:      ${IDENTITY.timezone}` },
 	],
 
 	ping: (args) => {

@@ -4,7 +4,6 @@ export const SITE_VERSION = __APP_VERSION__
 export const IDENTITY = {
 	name: "Smyile",
 	role: "Software Engineer / AI",
-	timezone: "Europe/Rome",
 } as const
 
 export type ProjectStatus = "shipping" | "live" | "archived"

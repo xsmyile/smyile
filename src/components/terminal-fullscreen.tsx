@@ -10,7 +10,6 @@ import {
 	useState,
 } from "react"
 import { createPortal } from "react-dom"
-import { useOwnerClock } from "../hooks/use-owner-clock"
 import type { HistoryEntry, TerminalSession } from "../hooks/use-terminal-session"
 import { type GitHubEvent, summarizeActivity } from "../lib/github-api"
 import { SLASH_COMMANDS } from "../lib/terminal-commands"
@@ -79,7 +78,6 @@ type ViewProps = {
 }
 
 function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
-	const time = useOwnerClock()
 	const { activeRepo } = summarizeActivity(events)
 	const visitorId = useMemo(() => getVisitorId(), [])
 	const { history, input } = session
@@ -195,9 +193,6 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 				<span className="ml-auto hidden gap-4 sm:flex">
 					<span>
 						now <b className="font-medium text-sys-text">{activeRepo ?? "--"}</b>
-					</span>
-					<span>
-						Rome <b className="font-medium text-sys-accent tabular-nums">{time}</b>
 					</span>
 				</span>
 				<button

@@ -1,7 +1,6 @@
 import { motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import type { GitHubData } from "../hooks/use-github"
-import { useOwnerClock } from "../hooks/use-owner-clock"
 import { useTerminalSession } from "../hooks/use-terminal-session"
 import { IDENTITY, SOCIAL_LINKS } from "../lib/constants"
 import { formatRelativeTime, summarizeActivity } from "../lib/github-api"
@@ -42,10 +41,8 @@ function useTypedCommand(command: string): { typed: string; done: boolean } {
 }
 
 function Readout({ github }: { github: GitHubData }) {
-	const time = useOwnerClock()
 	const { lastPushAt, activeRepo } = summarizeActivity(github.events)
 	const items = [
-		{ label: "Rome", value: time },
 		{ label: "Last push", value: lastPushAt ? formatRelativeTime(lastPushAt) : "--" },
 		{ label: "Now", value: activeRepo ?? "--" },
 	]

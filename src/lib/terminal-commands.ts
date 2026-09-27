@@ -128,9 +128,7 @@ const COMMANDS: Record<string, CommandHandler> = {
 
 	neofetch: (_args, ctx) => {
 		const specs = SPECIALIZATIONS.map((s) => s.name).join(", ")
-		const orgs = ORGANIZATIONS.filter((o) => o.showcase)
-			.map((o) => o.name)
-			.join(", ")
+		const orgs = [...new Set(ORGANIZATIONS.filter((o) => o.showcase).map((o) => o.name))].join(", ")
 		return [
 			{ text: "  smyile@blackbird", color: "var(--color-sys-accent)" },
 			{ text: "  ─────────────────" },

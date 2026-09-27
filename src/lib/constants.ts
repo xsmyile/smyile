@@ -4,14 +4,14 @@ export const SITE_VERSION = __APP_VERSION__
 export const IDENTITY = {
 	name: "Smyile",
 	role: "Software Engineer",
-	timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+	timezone: "Europe/Rome",
 } as const
 
 export const PROJECTS = [
 	{
 		name: "SISSY",
-		url: "https://github.com/xsmyile/sissy",
-		description: "macOS menubar cat tracking AI-coding token spend",
+		url: "https://sissy.smyile.com",
+		description: "The numbers you keep checking, in the macOS menu bar",
 		repo: "xsmyile/sissy",
 	},
 	{
@@ -19,12 +19,6 @@ export const PROJECTS = [
 		url: "https://rustmail.app",
 		description: "Self-hosted SMTP mail catcher with web UI",
 		repo: "rustmailapp/rustmail",
-	},
-	{
-		name: "MIZUHUB",
-		url: "https://mizuhub.com",
-		description: "Smart watering system",
-		repo: "mizu-systems/mizu-web",
 	},
 	{
 		name: "OVERBOT",

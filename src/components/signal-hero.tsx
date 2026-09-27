@@ -1,6 +1,7 @@
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import type { GitHubData } from "../hooks/use-github"
+import { useTerminalSession } from "../hooks/use-terminal-session"
 import { IDENTITY, SOCIAL_LINKS } from "../lib/constants"
 import { formatRelativeTime, summarizeActivity } from "../lib/github-api"
 import { TerminalWindow } from "./terminal-window"
@@ -99,6 +100,13 @@ type Props = {
 
 export function SignalHero({ github, sissyOut, onSummonSissy }: Props) {
 	const { typed, done } = useTypedCommand(WHOAMI)
+	const session = useTerminalSession({
+		user: github.user,
+		totalStars: github.totalStars,
+		events: github.events,
+		sissyOut,
+		onSummonSissy,
+	})
 
 	return (
 		<div className="grid justify-items-center gap-[clamp(28px,4vw,48px)] px-[clamp(16px,5vw,64px)] pt-[clamp(40px,7vw,96px)] pb-[clamp(36px,5vw,64px)]">
@@ -128,13 +136,7 @@ export function SignalHero({ github, sissyOut, onSummonSissy }: Props) {
 
 			<Readout github={github} />
 
-			<TerminalWindow
-				user={github.user}
-				totalStars={github.totalStars}
-				events={github.events}
-				sissyOut={sissyOut}
-				onSummonSissy={onSummonSissy}
-			/>
+			<TerminalWindow session={session} />
 
 			<div className="flex flex-wrap justify-center gap-2.5">
 				{SOCIAL_LINKS.map((link) => (

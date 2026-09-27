@@ -1,12 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { getUptime } from "../hooks/use-uptime"
-import type { GitHubEvent, GitHubUser } from "../lib/github-api"
-import {
-	completeInput,
-	executeCommand,
-	getWelcomeMessage,
-	type OutputLine,
-} from "../lib/terminal-commands"
+import type { TerminalSession } from "../hooks/use-terminal-session"
+import type { OutputLine } from "../lib/terminal-commands"
 import { getVisitorId } from "../lib/visitor-id"
 
 const HINTS = ["ls projects", "ls orgs", "neofetch", "cat overbot", "help"] as const
@@ -14,17 +8,7 @@ const HINT_ROTATE_MS = 3500
 const TOUCH_COMMANDS = ["help", "ls projects", "ls orgs", "neofetch"] as const
 
 type Props = {
-	user: GitHubUser | null
-	totalStars: number
-	events: GitHubEvent[]
-	sissyOut: boolean
-	onSummonSissy: (terminal: DOMRect) => void
-}
-
-type HistoryEntry = {
-	id: number
-	command: string
-	output: OutputLine[]
+	session: TerminalSession
 }
 
 function Line({ line }: { line: OutputLine }) {
@@ -61,20 +45,14 @@ function Prompt({ id }: { id: string }) {
 	)
 }
 
-export function TerminalWindow({ user, totalStars, events, sissyOut, onSummonSissy }: Props) {
+export function TerminalWindow({ session }: Props) {
 	const visitorId = useMemo(() => getVisitorId(), [])
-	const [history, setHistory] = useState<HistoryEntry[]>(() => [
-		{ id: 0, command: "", output: getWelcomeMessage() },
-	])
-	const [input, setInput] = useState("")
-	const [cmdHistory, setCmdHistory] = useState<string[]>([])
-	const [historyIndex, setHistoryIndex] = useState(-1)
+	const { history, input } = session
 	const [focused, setFocused] = useState(false)
 	const [hintIndex, setHintIndex] = useState(0)
 	const windowRef = useRef<HTMLDivElement>(null)
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const inputRef = useRef<HTMLInputElement>(null)
-	const entryIdRef = useRef(0)
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll on history change
 	useEffect(() => {
@@ -86,60 +64,8 @@ export function TerminalWindow({ user, totalStars, events, sissyOut, onSummonSis
 		return () => clearInterval(interval)
 	}, [])
 
-	function append(command: string, output: OutputLine[]) {
-		const nextId = ++entryIdRef.current
-		setHistory((prev) => [...prev, { id: nextId, command, output }])
-	}
-
 	function run(command: string) {
-		const trimmed = command.trim()
-		if (!trimmed) return
-
-		const result = executeCommand(trimmed, {
-			user,
-			totalStars,
-			events,
-			uptime: getUptime(),
-			sissyOut,
-		})
-
-		if (result.clear) setHistory([])
-		else append(trimmed, result.output)
-
-		if (result.summonSissy && windowRef.current) {
-			onSummonSissy(windowRef.current.getBoundingClientRect())
-		}
-
-		setCmdHistory((prev) => [trimmed, ...prev])
-		setHistoryIndex(-1)
-		setInput("")
-	}
-
-	function handleKeyDown(e: React.KeyboardEvent) {
-		if (e.key === "c" && (e.ctrlKey || e.metaKey) && input && !window.getSelection()?.toString()) {
-			e.preventDefault()
-			append(`${input}^C`, [])
-			setHistoryIndex(-1)
-			setInput("")
-			return
-		}
-		if (e.key === "Tab" && !e.shiftKey && input) {
-			e.preventDefault()
-			const { value, candidates } = completeInput(input)
-			if (candidates.length > 1)
-				append(input, [{ text: candidates.join("   "), color: "var(--color-sys-text-dim)" }])
-			setInput(value)
-		} else if (e.key === "ArrowUp") {
-			e.preventDefault()
-			const next = Math.min(historyIndex + 1, cmdHistory.length - 1)
-			setHistoryIndex(next)
-			setInput(cmdHistory[next] ?? "")
-		} else if (e.key === "ArrowDown") {
-			e.preventDefault()
-			const next = historyIndex - 1
-			setHistoryIndex(Math.max(next, -1))
-			setInput(next < 0 ? "" : (cmdHistory[next] ?? ""))
-		}
+		session.run(command, { anchor: windowRef.current })
 	}
 
 	const hint = `try: ${HINTS[hintIndex]}`
@@ -196,8 +122,8 @@ export function TerminalWindow({ user, totalStars, events, sissyOut, onSummonSis
 							type="text"
 							value={input}
 							aria-label="Terminal command"
-							onChange={(e) => setInput(e.target.value.toLowerCase())}
-							onKeyDown={handleKeyDown}
+							onChange={(e) => session.setInput(e.target.value)}
+							onKeyDown={session.handleKeyDown}
 							onFocus={() => setFocused(true)}
 							onBlur={() => setFocused(false)}
 							maxLength={200}

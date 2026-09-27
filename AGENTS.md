@@ -54,6 +54,7 @@ src/
 ├── hooks/
 │   ├── use-github.ts           # Profile, events (owner-filtered), star totals
 │   ├── use-boot-sequence.ts    # Boot animation timing + state
+│   ├── use-terminal-session.ts # Shared terminal history, input and key handling
 │   └── use-uptime.ts           # Session timer
 └── lib/
     ├── github-api.ts           # GitHub REST client with localStorage caching (5-min TTL)

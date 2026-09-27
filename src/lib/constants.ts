@@ -4,7 +4,7 @@ export const SITE_VERSION = __APP_VERSION__
 export const IDENTITY = {
 	name: "Smyile",
 	role: "Software Engineer",
-	timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+	timezone: "Europe/Rome",
 } as const
 
 export const PROJECTS = [

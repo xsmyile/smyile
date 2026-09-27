@@ -25,6 +25,8 @@ const ENTER_SCALE = 0.98
 const TRANSITION_S = 0.18
 const INPUT_MAX_LENGTH = 200
 const MENU_ID = "slash-menu"
+const PAGE_CONTENT_SELECTOR = "main"
+const SCROLL_LOCK = "hidden"
 
 type Props = {
 	open: boolean
@@ -273,6 +275,7 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 						data-terminal-input=""
 						role="combobox"
 						aria-label="Terminal command"
+						aria-haspopup="listbox"
 						aria-expanded={menuOpen}
 						aria-controls={menuOpen ? MENU_ID : undefined}
 						aria-autocomplete="list"
@@ -325,24 +328,31 @@ export function TerminalFullscreen({ open, onOpenChange, session, events, return
 		return () => window.removeEventListener("keydown", handleShortcut)
 	}, [onOpenChange])
 
+	const previousOverflow = useRef("")
+
 	useEffect(() => {
 		if (!open) return
-		const { body } = document
-		const previousOverflow = body.style.overflow
-		const returnFocus = returnFocusRef.current
+		const page = document.querySelector(PAGE_CONTENT_SELECTOR)
 		const replaceHash = (hash: string) =>
 			navigate({ to: ".", hash, replace: true, resetScroll: false, hashScrollIntoView: false })
-		body.style.overflow = "hidden"
+		if (document.body.style.overflow !== SCROLL_LOCK)
+			previousOverflow.current = document.body.style.overflow
+		document.body.style.overflow = SCROLL_LOCK
+		page?.setAttribute("inert", "")
 		replaceHash(TERMINAL_HASH_ID)
 		return () => {
-			body.style.overflow = previousOverflow
+			page?.removeAttribute("inert")
 			replaceHash("")
-			returnFocus?.focus({ preventScroll: true })
 		}
-	}, [open, returnFocusRef, navigate])
+	}, [open, navigate])
+
+	const handleExitComplete = useCallback(() => {
+		document.body.style.overflow = previousOverflow.current
+		returnFocusRef.current?.focus({ preventScroll: true })
+	}, [returnFocusRef])
 
 	return createPortal(
-		<AnimatePresence>
+		<AnimatePresence onExitComplete={handleExitComplete}>
 			{open && (
 				<FullscreenView
 					key="terminal-fullscreen"

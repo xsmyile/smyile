@@ -95,8 +95,9 @@ export function useTerminalSession({
 			return
 		}
 		if (e.key === "Tab" && !e.shiftKey && input) {
-			e.preventDefault()
 			const { value, candidates } = completeInput(input)
+			if (value === input && candidates.length === 0) return
+			e.preventDefault()
 			if (candidates.length > 1)
 				append(input, [{ text: candidates.join("   "), color: "var(--color-sys-text-dim)" }])
 			setRawInput(value)

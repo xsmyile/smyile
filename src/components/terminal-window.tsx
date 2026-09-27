@@ -37,7 +37,7 @@ export function Line({ line }: { line: OutputLine }) {
 	)
 }
 
-function Prompt({ id }: { id: string }) {
+export function Prompt({ id }: { id: string }) {
 	return (
 		<>
 			<span className="text-sys-green">{id}@smyile</span>

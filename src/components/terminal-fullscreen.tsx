@@ -1,12 +1,21 @@
 import { useNavigate } from "@tanstack/react-router"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { type KeyboardEvent, type RefObject, useCallback, useEffect, useRef, useState } from "react"
+import {
+	type KeyboardEvent,
+	type RefObject,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react"
 import { createPortal } from "react-dom"
 import { useOwnerClock } from "../hooks/use-owner-clock"
 import type { HistoryEntry, TerminalSession } from "../hooks/use-terminal-session"
 import { type GitHubEvent, summarizeActivity } from "../lib/github-api"
 import { SLASH_COMMANDS } from "../lib/terminal-commands"
-import { Line } from "./terminal-window"
+import { getVisitorId } from "../lib/visitor-id"
+import { Line, Prompt } from "./terminal-window"
 
 const TERMINAL_HASH_ID = "terminal"
 const TERMINAL_INPUT_ATTR = "data-terminal-input"
@@ -43,30 +52,19 @@ function optionId(name: string): string {
 	return `${MENU_ID}-${name.slice(1)}`
 }
 
-function Entry({ entry }: { entry: HistoryEntry }) {
+function Entry({ entry, visitorId }: { entry: HistoryEntry; visitorId: string }) {
 	return (
 		<div className="mb-3">
 			{entry.command && (
-				<div className="whitespace-pre-wrap wrap-break-word text-sys-text-soft">
-					<span className="text-sys-text-faint">{"> "}</span>
-					{entry.command}
+				<div className="whitespace-pre-wrap wrap-break-word">
+					<Prompt id={visitorId} />
+					<span className="text-sys-text">{entry.command}</span>
 				</div>
 			)}
-			{entry.output.length > 0 && (
-				<div className="flex gap-x-2">
-					{entry.command && (
-						<span aria-hidden="true" className="text-sys-text-faint">
-							⎿
-						</span>
-					)}
-					<div className="min-w-0 flex-1">
-						{entry.output.map((line, j) => (
-							// biome-ignore lint/suspicious/noArrayIndexKey: output lines are static per entry
-							<Line key={j} line={line} />
-						))}
-					</div>
-				</div>
-			)}
+			{entry.output.map((line, j) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: output lines are static per entry
+				<Line key={j} line={line} />
+			))}
 		</div>
 	)
 }
@@ -81,6 +79,7 @@ type ViewProps = {
 function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 	const time = useOwnerClock()
 	const { activeRepo } = summarizeActivity(events)
+	const visitorId = useMemo(() => getVisitorId(), [])
 	const { history, input } = session
 	const [menuActive, setMenuActive] = useState(() => isSlashQuery(session.input))
 	const [menuIndex, setMenuIndex] = useState(0)
@@ -180,115 +179,123 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 			exit={hidden}
 			transition={transition}
 			onKeyDown={trapFocus}
-			className="fixed inset-0 z-50 bg-sys-bg font-mono text-sm leading-relaxed text-sys-text"
+			className="terminal-screen fixed inset-0 z-50 flex flex-col font-mono text-sm leading-relaxed text-sys-text"
 		>
-			<div className="mx-auto flex h-full w-full max-w-[1100px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6">
-				<div className="shrink-0 rounded-md border border-sys-accent/40 px-4 py-3">
-					<div className="flex items-center gap-2">
-						<span className="text-sys-accent">✻</span>
-						<span>
-							Welcome to <b className="font-semibold text-sys-accent">smyile</b>
-						</span>
-						<button
-							ref={closeRef}
-							type="button"
-							onClick={onClose}
-							aria-label="Close fullscreen terminal"
-							className="ml-auto px-1.5 text-xs text-sys-text-faint transition-colors hover:text-sys-text"
-						>
-							esc ×
-						</button>
-					</div>
-					<div className="mt-3 pl-[2ch] text-sys-text-dim">/help for commands · esc to exit</div>
-					<div className="mt-1 pl-[2ch] text-sys-text-faint">cwd: ~/smyile</div>
-				</div>
-
-				{/* biome-ignore lint/a11y/useKeyWithClickEvents: click-to-focus delegates to input */}
-				{/* biome-ignore lint/a11y/noStaticElementInteractions: click-to-focus delegates to input */}
-				<div
-					ref={scrollRef}
-					aria-live="polite"
-					className="terminal-glow min-h-0 flex-1 overflow-x-hidden overflow-y-auto select-text"
-					onClick={() => {
-						if (!window.getSelection()?.toString()) inputRef.current?.focus({ preventScroll: true })
-					}}
+			<div className="flex shrink-0 items-center gap-4 border-b border-sys-border px-[clamp(16px,2.4vw,28px)] py-2.5 text-[0.7rem] tracking-[0.18em] text-sys-text-dim uppercase">
+				<span className="truncate">
+					{"TTY // "}
+					{visitorId}@smyile
+				</span>
+				<span className="flex shrink-0 items-center gap-2 text-sys-green">
+					<span className="led led-pulse" />
+					connected
+				</span>
+				<span className="ml-auto hidden gap-4 sm:flex">
+					<span>
+						now <b className="font-medium text-sys-text">{activeRepo ?? "--"}</b>
+					</span>
+					<span>
+						Rome <b className="font-medium text-sys-accent tabular-nums">{time}</b>
+					</span>
+				</span>
+				<button
+					ref={closeRef}
+					type="button"
+					onClick={onClose}
+					aria-label="Close fullscreen terminal"
+					className="ml-auto shrink-0 px-1.5 py-1 transition-colors hover:text-sys-magenta focus-visible:text-sys-magenta sm:ml-0"
 				>
-					{history.map((entry) => (
-						<Entry key={entry.id} entry={entry} />
-					))}
-				</div>
-
-				<form
-					onSubmit={(e) => {
-						e.preventDefault()
-						run(input)
-					}}
-					className="shrink-0"
-				>
-					<div
-						ref={boxRef}
-						className="flex items-center gap-2 rounded-lg border border-sys-border-strong px-3 py-2 transition-colors focus-within:border-sys-text-faint"
-					>
-						<span aria-hidden="true" className="text-sys-text-dim">
-							{">"}
-						</span>
-						<input
-							ref={inputRef}
-							type="text"
-							value={input}
-							data-terminal-input=""
-							role="combobox"
-							aria-label="Terminal command"
-							aria-expanded={menuOpen}
-							aria-controls={menuOpen ? MENU_ID : undefined}
-							aria-autocomplete="list"
-							aria-activedescendant={picked ? optionId(picked.name) : undefined}
-							onChange={(e) => handleChange(e.target.value)}
-							onKeyDown={handleKeyDown}
-							maxLength={INPUT_MAX_LENGTH}
-							placeholder={'Try "/projects" or "neofetch"'}
-							className="min-w-0 flex-1 bg-transparent text-base text-sys-text caret-sys-accent outline-none placeholder:text-sys-text-faint sm:text-sm"
-							spellCheck={false}
-							autoComplete="off"
-							autoCapitalize="none"
-						/>
-					</div>
-
-					{menuOpen ? (
-						<div
-							id={MENU_ID}
-							role="listbox"
-							aria-label="Slash commands"
-							className="px-1 pt-1.5 text-xs"
-						>
-							{matches.map((c, i) => (
-								<div
-									key={c.name}
-									id={optionId(c.name)}
-									role="option"
-									tabIndex={-1}
-									aria-selected={i === activeIndex}
-									onMouseDown={(e) => {
-										e.preventDefault()
-										run(c.name)
-									}}
-									className={`flex cursor-pointer gap-4 px-2 py-0.5 ${i === activeIndex ? "text-sys-accent" : "text-sys-text-dim"}`}
-								>
-									<span className="w-[10ch] shrink-0">{c.name}</span>
-									<span className="min-w-0 truncate">{c.description}</span>
-								</div>
-							))}
-						</div>
-					) : (
-						<div className="flex flex-wrap justify-between gap-x-4 gap-y-1 px-1 pt-1.5 text-xs text-sys-text-faint">
-							<span>
-								smyile · Rome {time} · now {activeRepo ?? "--"}
-							</span>
-							<span>? for shortcuts</span>
-						</div>
-					)}
-				</form>
+					esc ✕
+				</button>
 			</div>
+
+			{/* biome-ignore lint/a11y/useKeyWithClickEvents: click-to-focus delegates to input */}
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: click-to-focus delegates to input */}
+			<div
+				ref={scrollRef}
+				aria-live="polite"
+				className="terminal-glow min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-[clamp(16px,2.4vw,28px)] pt-5 select-text"
+				onClick={() => {
+					if (!window.getSelection()?.toString()) inputRef.current?.focus({ preventScroll: true })
+				}}
+			>
+				{history.map((entry) => (
+					<Entry key={entry.id} entry={entry} visitorId={visitorId} />
+				))}
+			</div>
+
+			<form
+				onSubmit={(e) => {
+					e.preventDefault()
+					run(input)
+				}}
+				className="shrink-0 border-t border-sys-border bg-[rgba(4,4,6,0.7)] px-[clamp(16px,2.4vw,28px)] pt-3 pb-3.5"
+			>
+				{menuOpen && (
+					<div
+						id={MENU_ID}
+						role="listbox"
+						aria-label="Slash commands"
+						className="mb-2 border border-sys-border-strong bg-[rgba(5,5,8,0.94)] text-[0.8rem]"
+					>
+						{matches.map((c, i) => (
+							<div
+								key={c.name}
+								id={optionId(c.name)}
+								role="option"
+								tabIndex={-1}
+								aria-selected={i === activeIndex}
+								onMouseDown={(e) => {
+									e.preventDefault()
+									run(c.name)
+								}}
+								className={`flex cursor-pointer gap-4 px-3.5 py-1 ${i === activeIndex ? "bg-sys-accent/10 text-sys-text" : "text-sys-text-dim"}`}
+							>
+								<span
+									className={`w-[12ch] shrink-0 ${i === activeIndex ? "text-sys-accent" : "text-sys-text-soft"}`}
+								>
+									{c.name}
+								</span>
+								<span className="min-w-0 truncate">{c.description}</span>
+							</div>
+						))}
+					</div>
+				)}
+
+				<div ref={boxRef} className="flex min-w-0 items-center">
+					<span className="shrink-0 whitespace-pre">
+						<Prompt id={visitorId} />
+					</span>
+					<input
+						ref={inputRef}
+						type="text"
+						value={input}
+						data-terminal-input=""
+						role="combobox"
+						aria-label="Terminal command"
+						aria-expanded={menuOpen}
+						aria-controls={menuOpen ? MENU_ID : undefined}
+						aria-autocomplete="list"
+						aria-activedescendant={picked ? optionId(picked.name) : undefined}
+						onChange={(e) => handleChange(e.target.value)}
+						onKeyDown={handleKeyDown}
+						maxLength={INPUT_MAX_LENGTH}
+						placeholder="type help, or / for commands"
+						className="min-w-0 flex-1 bg-transparent text-base text-sys-text caret-sys-accent outline-none placeholder:text-sys-text-faint sm:text-sm"
+						spellCheck={false}
+						autoComplete="off"
+						autoCapitalize="none"
+					/>
+				</div>
+
+				<div className="mt-2 flex flex-wrap justify-between gap-x-4 gap-y-1 text-[0.7rem] tracking-wider text-sys-text-faint">
+					<span>
+						<kbd className="kbd">tab</kbd> complete · <kbd className="kbd">↑↓</kbd> history ·{" "}
+						<kbd className="kbd">/</kbd> commands · <kbd className="kbd">?</kbd> shortcuts
+					</span>
+					<span>esc back to smyile.com</span>
+				</div>
+			</form>
 		</motion.div>
 	)
 }

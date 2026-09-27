@@ -47,7 +47,7 @@ src/
 │   ├── signal-page.tsx         # Page shell: boot, background, ticker, hero, sections, Sissy pet
 │   ├── signal-hero.tsx         # whoami reveal, name, readout (Rome time, last push, active repo)
 │   ├── terminal-window.tsx     # Interactive terminal (history, Tab completion, touch-only chips)
-│   ├── terminal-fullscreen.tsx # Claude Code style fullscreen terminal (⤢, Ctrl+K, /#terminal)
+│   ├── terminal-fullscreen.tsx # Edge-to-edge TTY fullscreen terminal (⤢, Ctrl+K, /#terminal)
 │   ├── signal-sections.tsx     # Projects list + network tree
 │   ├── sissy-pet.tsx           # Draggable, blinking Sissy easter egg (spawned only by `sissy`)
 │   ├── ticker-strip.tsx        # Top marquee of recent activity

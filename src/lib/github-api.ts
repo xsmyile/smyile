@@ -101,7 +101,8 @@ export type GitHubEvent = {
 	created_at: string
 	payload: {
 		action?: string
-		commits?: Array<{ message: string; sha: string }>
+		number?: number
+		issue?: { number: number }
 		ref?: string
 		ref_type?: string
 		release?: { tag_name: string }
@@ -151,15 +152,17 @@ export async function fetchLatestRelease() {
 	)
 }
 
+function formatRef(number: number | undefined): string {
+	return number === undefined ? "" : ` #${number}`
+}
+
 export function formatEventDescription(event: GitHubEvent): string {
 	const repo = event.repo.name.replace(`${GITHUB_USERNAME}/`, "")
 
 	switch (event.type) {
 		case "PushEvent": {
-			const count = event.payload.commits?.length ?? 0
-			if (count === 0) return `[${repo}] synced branch`
-			const msg = event.payload.commits?.[0]?.message.split("\n")[0] ?? ""
-			return `[${repo}] pushed ${count} commit${count !== 1 ? "s" : ""}: ${msg}`
+			const branch = event.payload.ref?.replace("refs/heads/", "")
+			return branch ? `[${repo}] pushed to ${branch}` : `[${repo}] pushed`
 		}
 		case "CreateEvent":
 			return `[${repo}] created ${event.payload.ref_type} ${event.payload.ref ?? ""}`
@@ -168,9 +171,9 @@ export function formatEventDescription(event: GitHubEvent): string {
 		case "ReleaseEvent":
 			return `[${repo}] released ${event.payload.release?.tag_name ?? ""}`
 		case "IssuesEvent":
-			return `[${repo}] ${event.payload.action} issue`
+			return `[${repo}] ${event.payload.action} issue${formatRef(event.payload.issue?.number)}`
 		case "PullRequestEvent":
-			return `[${repo}] ${event.payload.action} pull request`
+			return `[${repo}] ${event.payload.action} PR${formatRef(event.payload.number)}`
 		case "WatchEvent":
 			return `[${repo}] starred`
 		case "ForkEvent":

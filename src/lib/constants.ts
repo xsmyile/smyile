@@ -10,8 +10,8 @@ export const IDENTITY = {
 export const PROJECTS = [
 	{
 		name: "SISSY",
-		url: "https://github.com/xsmyile/sissy",
-		description: "macOS menubar cat tracking AI-coding token spend",
+		url: "https://sissy.smyile.com",
+		description: "The numbers you keep checking, in the macOS menu bar",
 		repo: "xsmyile/sissy",
 	},
 	{

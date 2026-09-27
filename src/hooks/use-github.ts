@@ -1,33 +1,21 @@
 import { useEffect, useState } from "react"
-import { ORGANIZATIONS } from "../lib/constants"
-import type { GitHubEvent, GitHubRelease, GitHubRepo, GitHubUser } from "../lib/github-api"
-import {
-	fetchLatestRelease,
-	fetchOrgRepos,
-	fetchUserEvents,
-	fetchUserProfile,
-	fetchUserRepos,
-} from "../lib/github-api"
+import { ACTIVITY_OWNERS, STAR_SOURCE_ORGS } from "../lib/constants"
+import type { GitHubEvent, GitHubRepo, GitHubUser } from "../lib/github-api"
+import { fetchOrgRepos, fetchUserEvents, fetchUserProfile, fetchUserRepos } from "../lib/github-api"
 
-type GitHubData = {
+export type GitHubData = {
 	user: GitHubUser | null
 	totalStars: number
-	repos: GitHubRepo[]
 	events: GitHubEvent[]
-	latestRelease: GitHubRelease | null
-	loading: boolean
-	cached: boolean
-	error: string | null
+	eventsFailed: boolean
 }
 
 const FILTERED_EVENTS = new Set(["WatchEvent", "IssueCommentEvent"])
 
-const GITHUB_ORG_NAMES = Array.from(
-	new Set(ORGANIZATIONS.filter((o) => o.platform === "github").map((o) => o.name)),
-)
-
 function filterEvents(events: GitHubEvent[]): GitHubEvent[] {
-	return events.filter((e) => !FILTERED_EVENTS.has(e.type))
+	return events.filter(
+		(e) => !FILTERED_EVENTS.has(e.type) && ACTIVITY_OWNERS.has(e.repo.name.split("/")[0]),
+	)
 }
 
 function sumStars(repoSets: GitHubRepo[][]): number {
@@ -38,68 +26,30 @@ export function useGitHub(): GitHubData {
 	const [state, setState] = useState<GitHubData>({
 		user: null,
 		totalStars: 0,
-		repos: [],
 		events: [],
-		latestRelease: null,
-		loading: true,
-		cached: false,
-		error: null,
+		eventsFailed: false,
 	})
 
 	useEffect(() => {
 		let cancelled = false
 
 		async function run() {
-			const orgRepoFetches = GITHUB_ORG_NAMES.map((name) => fetchOrgRepos(name))
-
-			const results = await Promise.allSettled([
+			const [userResult, eventsResult, ...repoResults] = await Promise.allSettled([
 				fetchUserProfile(),
-				fetchUserRepos(),
 				fetchUserEvents(),
-				fetchLatestRelease(),
-				...orgRepoFetches,
+				fetchUserRepos(),
+				...STAR_SOURCE_ORGS.map((name) => fetchOrgRepos(name)),
 			])
 
 			if (cancelled) return
 
-			const [userResult, userReposResult, eventsResult, releaseResult, ...orgResults] = results
-
-			const user = userResult.status === "fulfilled" ? userResult.value.data : null
-			const userRepos = userReposResult.status === "fulfilled" ? userReposResult.value.data : []
-			const events =
-				eventsResult.status === "fulfilled" ? filterEvents(eventsResult.value.data) : []
-			const releases = releaseResult.status === "fulfilled" ? releaseResult.value.data : []
-
-			const allRepoSets = [userRepos]
-			for (const result of orgResults) {
-				if (result.status === "fulfilled") {
-					allRepoSets.push(result.value.data)
-				}
-			}
-
-			const cached = results.some((r) => r.status === "fulfilled" && r.value.cached)
-
-			const criticalFailure =
-				userResult.status === "rejected"
-					? userResult.reason
-					: userReposResult.status === "rejected"
-						? userReposResult.reason
-						: null
-			const error = criticalFailure
-				? criticalFailure instanceof Error
-					? criticalFailure.message
-					: "GitHub API unavailable"
-				: null
+			const repoSets = repoResults.flatMap((r) => (r.status === "fulfilled" ? [r.value.data] : []))
 
 			setState({
-				user,
-				totalStars: sumStars(allRepoSets),
-				repos: allRepoSets.flat(),
-				events,
-				latestRelease: releases[0] ?? null,
-				loading: false,
-				cached,
-				error,
+				user: userResult.status === "fulfilled" ? userResult.value.data : null,
+				totalStars: sumStars(repoSets),
+				events: eventsResult.status === "fulfilled" ? filterEvents(eventsResult.value.data) : [],
+				eventsFailed: eventsResult.status === "rejected",
 			})
 		}
 

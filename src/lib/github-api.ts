@@ -114,12 +114,6 @@ export type GitHubRepo = {
 	stargazers_count: number
 }
 
-export type GitHubRelease = {
-	tag_name: string
-	published_at: string
-	html_url: string
-}
-
 export async function fetchUserProfile() {
 	return fetchWithCache<GitHubUser>(`/users/${GITHUB_USERNAME}`, "gh_user")
 }
@@ -145,11 +139,24 @@ export async function fetchOrgRepos(org: string) {
 	)
 }
 
-export async function fetchLatestRelease() {
-	return fetchWithCache<GitHubRelease[]>(
-		`/repos/${GITHUB_USERNAME}/smyile/releases?per_page=1`,
-		"gh_releases",
-	)
+export type ActivitySummary = {
+	lastPushAt: string | null
+	activeRepo: string | null
+}
+
+export function shortRepoName(fullName: string): string {
+	return fullName.split("/").pop() ?? fullName
+}
+
+export function summarizeActivity(events: GitHubEvent[]): ActivitySummary {
+	const lastPush = events.find((e) => e.type === "PushEvent")
+	const counts = new Map<string, number>()
+	for (const e of events) counts.set(e.repo.name, (counts.get(e.repo.name) ?? 0) + 1)
+	const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]
+	return {
+		lastPushAt: lastPush?.created_at ?? null,
+		activeRepo: top ? shortRepoName(top[0]) : null,
+	}
 }
 
 function formatRef(number: number | undefined): string {
@@ -157,7 +164,7 @@ function formatRef(number: number | undefined): string {
 }
 
 export function formatEventDescription(event: GitHubEvent): string {
-	const repo = event.repo.name.replace(`${GITHUB_USERNAME}/`, "")
+	const repo = shortRepoName(event.repo.name)
 
 	switch (event.type) {
 		case "PushEvent": {
@@ -193,20 +200,4 @@ export function formatRelativeTime(dateStr: string): string {
 	const days = Math.floor(hours / 24)
 	if (days < 30) return `${days}d ago`
 	return `${Math.floor(days / 30)}mo ago`
-}
-
-export function getEventColor(type: string): string {
-	switch (type) {
-		case "PushEvent":
-			return "#89CFF0"
-		case "ReleaseEvent":
-			return "#00ff88"
-		case "CreateEvent":
-			return "#00d4ff"
-		case "IssuesEvent":
-		case "PullRequestEvent":
-			return "#ff0080"
-		default:
-			return "#666"
-	}
 }

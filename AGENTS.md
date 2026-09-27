@@ -4,7 +4,7 @@ Guidance for coding agents working in this repository.
 
 ## Project
 
-Personal portfolio dashboard (https://smyile.com) — cyberpunk-themed SPA showing GitHub activity, interactive terminal, and developer stats. Deployed to GitHub Pages on every `master` push.
+Personal site (https://smyile.com): cyberpunk-themed, terminal-first SPA with GitHub activity, projects and network. Deployed to GitHub Pages on every `master` push.
 
 ## Tech Stack
 
@@ -36,7 +36,7 @@ CI uses `bun install --frozen-lockfile` and `bun run build`.
 
 ## Architecture
 
-**Single-page app** with one route (`/`). All UI composes inside `DashboardLayout`.
+**Single-page app** with one route (`/`), terminal-first ("Signal" layout): name, status readout and a large terminal above the fold, projects and network below.
 
 ```
 src/
@@ -44,27 +44,32 @@ src/
 ├── styles.css                  # Theme variables, custom animations, global styles
 ├── routes/route-tree.ts        # TanStack Router tree (single index route)
 ├── components/
-│   ├── dashboard-layout.tsx    # Responsive 3-col grid (desktop) / drawer layout (mobile)
-│   ├── boot-sequence.tsx       # Splash animation (skipped on revisit via sessionStorage)
-│   ├── module-panel.tsx        # Reusable glass card wrapper for all modules
-│   └── modules/                # Feature modules rendered inside the dashboard grid
+│   ├── signal-page.tsx         # Page shell: boot, background, ticker, hero, sections, Sissy pet
+│   ├── signal-hero.tsx         # whoami reveal, name, readout (Rome time, last push, active repo)
+│   ├── terminal-window.tsx     # Interactive terminal (history, Tab completion, touch-only chips)
+│   ├── signal-sections.tsx     # Projects list + network tree
+│   ├── sissy-pet.tsx           # Draggable, blinking Sissy easter egg (spawned only by `sissy`)
+│   ├── ticker-strip.tsx        # Top marquee of recent activity
+│   └── boot-sequence.tsx       # Splash animation (skipped on revisit via sessionStorage)
 ├── hooks/
-│   ├── use-github.ts           # Main data fetching (profile, repos, events, releases)
+│   ├── use-github.ts           # Profile, events (owner-filtered), star totals
 │   ├── use-boot-sequence.ts    # Boot animation timing + state
-│   ├── use-media-query.ts      # Responsive breakpoint (1024px)
 │   └── use-uptime.ts           # Session timer
 └── lib/
     ├── github-api.ts           # GitHub REST client with localStorage caching (5-min TTL)
-    ├── terminal-commands.ts    # CLI command handlers for interactive terminal
+    ├── terminal-commands.ts    # CLI command handlers and Tab completion
+    ├── sissy-silhouette.ts     # SVG paths from the Sissy app (body + separate eye)
     ├── visitor-id.ts           # Browser fingerprinting
-    └── constants.ts            # Projects, social links, skills, version
+    └── constants.ts            # Identity, projects, network, social links, version
 ```
 
-**Data flow:** `useGitHub()` → `Promise.allSettled()` → state → props to modules.
+**Data flow:** `useGitHub()` → `Promise.allSettled()` → state → props to hero/terminal/ticker.
+
+**Activity filter:** only events from owners in `ACTIVITY_OWNERS` (own account + own orgs) reach the UI; other orgs never appear on the site.
 
 **Caching:** localStorage with `smyile_v{VERSION}_` prefix, 5-min TTL, stale fallback on API errors. Old version keys auto-purged on load.
 
-**Responsive:** Desktop = 3-col CSS grid. Mobile = stacked center + slide-in drawers (Framer Motion spring) with body scroll lock.
+**Responsive:** one column that stacks; projects and network sit side by side from 900px. Terminal command chips show only on touch (`pointer: coarse`).
 
 ## Release Process
 

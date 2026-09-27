@@ -1,6 +1,7 @@
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import type { GitHubData } from "../hooks/use-github"
+import { useOwnerClock } from "../hooks/use-owner-clock"
 import { useTerminalSession } from "../hooks/use-terminal-session"
 import { IDENTITY, SOCIAL_LINKS } from "../lib/constants"
 import { formatRelativeTime, summarizeActivity } from "../lib/github-api"
@@ -9,7 +10,6 @@ import { TerminalWindow } from "./terminal-window"
 const WHOAMI = "whoami"
 const TYPE_STEP_MS = 80
 const REVEAL_DELAY_MS = 300
-const CLOCK_TICK_MS = 10_000
 
 const fadeUp = {
 	hidden: { opacity: 0, y: 12 },
@@ -38,27 +38,6 @@ function useTypedCommand(command: string): { typed: string; done: boolean } {
 	}, [command])
 
 	return { typed, done }
-}
-
-const OWNER_CLOCK = new Intl.DateTimeFormat("en-GB", {
-	timeZone: IDENTITY.timezone,
-	hour: "2-digit",
-	minute: "2-digit",
-})
-
-function formatOwnerTime(): string {
-	return OWNER_CLOCK.format(new Date())
-}
-
-function useOwnerClock(): string {
-	const [time, setTime] = useState(formatOwnerTime)
-
-	useEffect(() => {
-		const interval = setInterval(() => setTime(formatOwnerTime()), CLOCK_TICK_MS)
-		return () => clearInterval(interval)
-	}, [])
-
-	return time
 }
 
 function Readout({ github }: { github: GitHubData }) {

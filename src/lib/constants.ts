@@ -21,12 +21,6 @@ export const PROJECTS = [
 		repo: "rustmailapp/rustmail",
 	},
 	{
-		name: "MIZUHUB",
-		url: "https://mizuhub.com",
-		description: "Smart watering system",
-		repo: "mizu-systems/mizu-web",
-	},
-	{
 		name: "OVERBOT",
 		url: "https://overbot.net",
 		description: "Discord bot for Overwatch 2 stats and rankings",

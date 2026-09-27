@@ -1,12 +1,12 @@
 import { createRootRoute, createRoute } from "@tanstack/react-router"
-import { DashboardLayout } from "../components/dashboard-layout"
+import { SignalPage } from "../components/signal-page"
 
 const rootRoute = createRootRoute()
 
 const indexRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/",
-	component: DashboardLayout,
+	component: SignalPage,
 })
 
 export const routeTree = rootRoute.addChildren([indexRoute])

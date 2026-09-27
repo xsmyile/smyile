@@ -23,13 +23,41 @@ export type TerminalContext = {
 	events: GitHubEvent[]
 	uptime: string
 	sissyOut: boolean
+	fullscreen: boolean
 }
 
 export type CommandResult = {
 	output: OutputLine[]
 	clear: boolean
 	summonSissy: boolean
+	exit: boolean
 }
+
+export type SlashCommand = {
+	name: string
+	description: string
+}
+
+export const SLASH_COMMANDS: readonly SlashCommand[] = [
+	{ name: "/help", description: "list commands and shortcuts" },
+	{ name: "/projects", description: "list projects" },
+	{ name: "/orgs", description: "studios and labs" },
+	{ name: "/sissy", description: "summon sissy" },
+	{ name: "/clear", description: "clear the scrollback" },
+	{ name: "/exit", description: "close the fullscreen terminal" },
+]
+
+const SLASH_ALIASES: Record<string, string> = {
+	"/help": "help",
+	"/projects": "ls projects",
+	"/orgs": "ls orgs",
+	"/sissy": "sissy",
+	"/clear": "clear",
+}
+
+const EXIT_COMMAND = "/exit"
+const SHORTCUTS_COMMAND = "?"
+const NO_EFFECTS = { clear: false, summonSissy: false, exit: false } as const
 
 const ACCENT = "var(--color-sys-accent)"
 const DIM = "var(--color-sys-text-dim)"
@@ -130,7 +158,17 @@ const COMMANDS: Record<string, CommandHandler> = {
 		{ text: "  whoami           visitor identity" },
 		{ text: "  uptime           session uptime" },
 		{ text: "  clear            clear terminal" },
+		{ text: "  /help            slash commands and shortcuts" },
 		{ text: "  ...and a few that aren't listed.", color: DIM },
+	],
+
+	[SHORTCUTS_COMMAND]: () => [
+		{ text: "Shortcuts:", color: ACCENT },
+		{ text: "  esc      close the menu, then exit fullscreen" },
+		{ text: "  tab      complete a command" },
+		{ text: "  ↑ ↓      command history, or move in the / menu" },
+		{ text: "  /        slash commands" },
+		{ text: "  ctrl+k   open the fullscreen terminal" },
 	],
 
 	whoami: () => [
@@ -257,10 +295,47 @@ const LISTED_COMMANDS = [
 	"clear",
 ]
 
+const SLASH_NAMES = SLASH_COMMANDS.map((c) => c.name)
+
+function slashHelp(): OutputLine[] {
+	return [
+		{ text: "" },
+		{ text: "Slash commands:", color: ACCENT },
+		...SLASH_COMMANDS.map((c) => ({ text: `  ${c.name.padEnd(16)} ${c.description}` })),
+		{ text: "  type ? in fullscreen for shortcuts", color: DIM },
+	]
+}
+
+function executeSlash(cmd: string, args: string[], ctx: TerminalContext): CommandResult {
+	if (cmd === EXIT_COMMAND) {
+		if (ctx.fullscreen) return { output: [], ...NO_EFFECTS, exit: true }
+		return {
+			output: [{ text: "/exit only works in fullscreen (ctrl+k to open)", color: DIM }],
+			...NO_EFFECTS,
+		}
+	}
+	const alias = SLASH_ALIASES[cmd]
+	if (!alias) {
+		return {
+			output: [
+				{
+					text: `unknown slash command: ${cmd.slice(0, ARG_ECHO_LIMIT)} (try /help)`,
+					color: ERROR,
+				},
+			],
+			...NO_EFFECTS,
+		}
+	}
+	const result = executeCommand([alias, ...args].join(" "), ctx)
+	if (cmd === "/help") return { ...result, output: [...result.output, ...slashHelp()] }
+	return result
+}
+
 export function completeInput(input: string): { value: string; candidates: string[] } {
 	const [cmd, ...rest] = input.trimStart().split(/\s+/)
 	if (rest.length === 0) {
-		const hits = LISTED_COMMANDS.filter((c) => c.startsWith(cmd))
+		const pool = cmd.startsWith("/") ? SLASH_NAMES : LISTED_COMMANDS
+		const hits = pool.filter((c) => c.startsWith(cmd))
 		return hits.length === 1
 			? { value: `${hits[0]} `, candidates: [] }
 			: { value: input, candidates: hits }
@@ -274,24 +349,24 @@ export function completeInput(input: string): { value: string; candidates: strin
 
 export function executeCommand(input: string, ctx: TerminalContext): CommandResult {
 	const trimmed = input.trim()
-	if (!trimmed) return { output: [], clear: false, summonSissy: false }
+	if (!trimmed) return { output: [], ...NO_EFFECTS }
 
 	const [cmd, ...rest] = trimmed.split(/\s+/)
 
-	if (cmd === "clear") return { output: [], clear: true, summonSissy: false }
+	if (cmd.startsWith("/")) return executeSlash(cmd, rest, ctx)
+	if (cmd === "clear") return { output: [], ...NO_EFFECTS, clear: true }
 
 	const handler = COMMANDS[cmd]
 	if (!handler) {
 		return {
 			output: [{ text: `command not found: ${cmd.slice(0, ARG_ECHO_LIMIT)}`, color: ERROR }],
-			clear: false,
-			summonSissy: false,
+			...NO_EFFECTS,
 		}
 	}
 
 	return {
 		output: handler(rest.join(" "), ctx),
-		clear: false,
+		...NO_EFFECTS,
 		summonSissy: cmd === "sissy" && !ctx.sissyOut,
 	}
 }

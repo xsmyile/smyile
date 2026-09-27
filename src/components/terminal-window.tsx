@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react"
 import type { TerminalSession } from "../hooks/use-terminal-session"
 import type { OutputLine } from "../lib/terminal-commands"
 import { getVisitorId } from "../lib/visitor-id"
@@ -9,9 +9,11 @@ const TOUCH_COMMANDS = ["help", "ls projects", "ls orgs", "neofetch"] as const
 
 type Props = {
 	session: TerminalSession
+	onExpand: () => void
+	expandRef: RefObject<HTMLButtonElement | null>
 }
 
-function Line({ line }: { line: OutputLine }) {
+export function Line({ line }: { line: OutputLine }) {
 	const style = line.color ? { color: line.color } : undefined
 	if (line.href) {
 		return (
@@ -45,7 +47,7 @@ function Prompt({ id }: { id: string }) {
 	)
 }
 
-export function TerminalWindow({ session }: Props) {
+export function TerminalWindow({ session, onExpand, expandRef }: Props) {
 	const visitorId = useMemo(() => getVisitorId(), [])
 	const { history, input } = session
 	const [focused, setFocused] = useState(false)
@@ -80,7 +82,17 @@ export function TerminalWindow({ session }: Props) {
 					{"TTY // "}
 					{visitorId}@smyile
 				</span>
-				<span className="ml-auto flex items-center gap-2 text-sys-green">
+				<button
+					ref={expandRef}
+					type="button"
+					onClick={onExpand}
+					aria-label="Open fullscreen terminal"
+					title="Fullscreen (ctrl+k)"
+					className="ml-auto px-1 text-base leading-none tracking-normal text-sys-text-dim transition-colors hover:text-sys-accent"
+				>
+					⤢
+				</button>
+				<span className="flex items-center gap-2 text-sys-green">
 					<span className="led" />
 					connected
 				</span>
@@ -122,6 +134,7 @@ export function TerminalWindow({ session }: Props) {
 							type="text"
 							value={input}
 							aria-label="Terminal command"
+							data-terminal-input=""
 							onChange={(e) => session.setInput(e.target.value)}
 							onKeyDown={session.handleKeyDown}
 							onFocus={() => setFocused(true)}

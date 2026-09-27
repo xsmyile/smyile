@@ -1,10 +1,11 @@
 import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { GitHubData } from "../hooks/use-github"
 import { useOwnerClock } from "../hooks/use-owner-clock"
 import { useTerminalSession } from "../hooks/use-terminal-session"
 import { IDENTITY, SOCIAL_LINKS } from "../lib/constants"
 import { formatRelativeTime, summarizeActivity } from "../lib/github-api"
+import { TerminalFullscreen } from "./terminal-fullscreen"
 import { TerminalWindow } from "./terminal-window"
 
 const WHOAMI = "whoami"
@@ -86,6 +87,8 @@ export function SignalHero({ github, sissyOut, onSummonSissy }: Props) {
 		sissyOut,
 		onSummonSissy,
 	})
+	const [fullscreen, setFullscreen] = useState(false)
+	const expandRef = useRef<HTMLButtonElement>(null)
 
 	return (
 		<div className="grid justify-items-center gap-[clamp(28px,4vw,48px)] px-[clamp(16px,5vw,64px)] pt-[clamp(40px,7vw,96px)] pb-[clamp(36px,5vw,64px)]">
@@ -115,7 +118,18 @@ export function SignalHero({ github, sissyOut, onSummonSissy }: Props) {
 
 			<Readout github={github} />
 
-			<TerminalWindow session={session} />
+			<TerminalWindow
+				session={session}
+				onExpand={() => setFullscreen(true)}
+				expandRef={expandRef}
+			/>
+			<TerminalFullscreen
+				open={fullscreen}
+				onOpenChange={setFullscreen}
+				session={session}
+				events={github.events}
+				returnFocusRef={expandRef}
+			/>
 
 			<div className="flex flex-wrap justify-center gap-2.5">
 				{SOCIAL_LINKS.map((link) => (

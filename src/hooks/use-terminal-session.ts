@@ -16,6 +16,7 @@ export type HistoryEntry = {
 
 export type TerminalView = {
 	anchor: HTMLElement | null
+	onExit?: () => void
 }
 
 type Options = {
@@ -68,10 +69,11 @@ export function useTerminalSession({
 			events,
 			uptime: getUptime(),
 			sissyOut,
+			fullscreen: view.onExit !== undefined,
 		})
 
 		if (result.clear) setHistory([])
-		else append(trimmed, result.output)
+		else if (!result.exit) append(trimmed, result.output)
 
 		if (result.summonSissy && view.anchor) {
 			onSummonSissy(view.anchor.getBoundingClientRect())
@@ -80,6 +82,8 @@ export function useTerminalSession({
 		setCmdHistory((prev) => [trimmed, ...prev])
 		setHistoryIndex(-1)
 		setRawInput("")
+
+		if (result.exit) view.onExit?.()
 	}
 
 	function handleKeyDown(e: KeyboardEvent) {

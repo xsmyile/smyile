@@ -3,6 +3,7 @@ import { GITHUB_USERNAME, SITE_VERSION } from "./constants"
 const BASE_URL = "https://api.github.com"
 const CACHE_TTL = 5 * 60 * 1000
 const CACHE_PREFIX = `smyile_${SITE_VERSION}_`
+const VERSIONED_KEY = /^smyile_v?\d/
 
 type CacheEntry<T> = {
 	data: T
@@ -19,7 +20,7 @@ function purgeStaleVersions() {
 		if (localStorage.getItem(purgedKey)) return
 		for (let i = localStorage.length - 1; i >= 0; i--) {
 			const k = localStorage.key(i)
-			if (k?.startsWith("smyile_") && !k.startsWith(CACHE_PREFIX)) {
+			if (k && VERSIONED_KEY.test(k) && !k.startsWith(CACHE_PREFIX)) {
 				localStorage.removeItem(k)
 			}
 		}

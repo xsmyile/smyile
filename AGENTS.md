@@ -69,22 +69,22 @@ src/
 
 **Activity filter:** only events from owners in `ACTIVITY_OWNERS` (own account + own orgs) reach the UI; other orgs never appear on the site.
 
-**Caching:** localStorage with `smyile_v{VERSION}_` prefix, 5-min TTL, stale fallback on API errors. Old version keys auto-purged on load.
+**Caching:** localStorage with `smyile_{VERSION}_` prefix, 5-min TTL, stale fallback on API errors. Keys of other versions auto-purged on load; unversioned keys (`smyile_last_login`) persist across deploys.
 
 **Responsive:** one column that stacks; projects and network sit side by side from 900px. Terminal command chips show only on touch (`pointer: coarse`).
 
 ## Release Process
 
+The git tag is the only version source: `vite.config.ts` runs `git describe --tags` at build time. On a tag the site shows `X.Y.Z`, after it `X.Y.Z+N.gSHA`. No version field in `package.json`, no bump commit.
+
 ```bash
-./scripts/release.sh <major|minor|patch>  # Updates version in package.json, lock, constants.ts
-# Then: commit, tag, push (script prints instructions)
+git tag vX.Y.Z && git push origin vX.Y.Z
 ```
 
-Tags trigger the release workflow which auto-generates changelog from conventional commits (feat/fix/perf/chore).
+The tag triggers the release workflow: changelog from conventional commits (feat/fix/perf/chore), then a redeploy of `master` so the site shows the clean version. Tag the `master` head; builds need full history and tags (`fetch-depth: 0`).
 
 ## Key Conventions
 
 - GitHub API is public (no auth token) — subject to rate limits
 - `/api` routes proxy to `localhost:8080` in dev (Vite config)
-- Version string must stay in sync across `package.json`, `package-lock.json`, and `src/lib/constants.ts`
 - SPA routing: deploy copies `index.html` → `404.html` for GitHub Pages

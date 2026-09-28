@@ -68,7 +68,7 @@ const STARS = "var(--color-sys-amber)"
 
 const SISSY_URL = "https://sissy.smyile.com"
 const SISSY_BREW = "brew install --cask xsmyile/sissy/sissy"
-const LAST_LOGIN_KEY = `smyile_${SITE_VERSION}_last_login`
+const LAST_LOGIN_KEY = "smyile_last_login"
 const ARG_ECHO_LIMIT = 40
 
 const LINK_LABELS: Record<NetworkNode["links"][number]["kind"], string> = {

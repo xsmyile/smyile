@@ -5,7 +5,8 @@ import type { TesseractWorld } from "../lib/tesseract-world"
 import { baseSpeed, fadeIn, paletteAt, streakFor, twistAt } from "../lib/tunnel-timeline"
 
 const MAX_STEP_S = 0.1
-const POINTER_EASE = 0.05
+const POINTER_RATE_PER_S = 3
+const MIN_FRAME_MS = 15
 const WHEEL_GAIN = 0.03
 const MAX_BOOST = 28
 const BOOST_DECAY_PER_S = 1.4
@@ -14,6 +15,14 @@ const ROLL_FOLLOW = 0.6
 const STILL_TIME_S = 6
 const STILL_TRAVEL = 24
 const BEAM_COLOR_PROPERTY = "--scene"
+
+const WHEEL_LINE_PX = 16
+
+function wheelUnit(deltaMode: number): number {
+	if (deltaMode === WheelEvent.DOM_DELTA_LINE) return WHEEL_LINE_PX
+	if (deltaMode === WheelEvent.DOM_DELTA_PAGE) return window.innerHeight
+	return 1
+}
 
 type Props = {
 	paused: boolean
@@ -63,12 +72,14 @@ export function TesseractBackdrop({ paused }: Props) {
 		function fit() {
 			if (!canvas || !world) return
 			const { width, height } = canvas.getBoundingClientRect()
+			if (width < 1 || height < 1) return
 			world.resize(width, height)
 			if (reduced) drawStill()
 		}
 
 		function frame(now: number) {
 			raf = requestAnimationFrame(frame)
+			if (last && now - last < MIN_FRAME_MS) return
 			const elapsed = last ? Math.min((now - last) / 1000, MAX_STEP_S) : 0
 			last = now
 			if (pausedRef.current || !world) return
@@ -79,8 +90,9 @@ export function TesseractBackdrop({ paused }: Props) {
 			const twist = twistAt(seconds)
 			travel += speed * elapsed
 			roll += twist * speed * ROLL_FOLLOW * elapsed
-			look.x += (target.x - look.x) * POINTER_EASE
-			look.y += (target.y - look.y) * POINTER_EASE
+			const ease = 1 - Math.exp(-POINTER_RATE_PER_S * elapsed)
+			look.x += (target.x - look.x) * ease
+			look.y += (target.y - look.y) * ease
 			world.render({
 				time: seconds,
 				travel,
@@ -106,7 +118,8 @@ export function TesseractBackdrop({ paused }: Props) {
 
 		function handleWheel(e: WheelEvent) {
 			if (pausedRef.current) return
-			boostTarget = Math.min(MAX_BOOST, boostTarget + Math.abs(e.deltaY) * WHEEL_GAIN)
+			const pixels = Math.abs(e.deltaY) * wheelUnit(e.deltaMode)
+			boostTarget = Math.min(MAX_BOOST, boostTarget + pixels * WHEEL_GAIN)
 		}
 
 		const observer = new ResizeObserver(fit)

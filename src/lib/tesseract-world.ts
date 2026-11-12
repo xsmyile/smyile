@@ -36,6 +36,8 @@ type WorldFrame = {
 	palette: readonly [Rgb, Rgb]
 	fade: number
 	streak: number
+	slow: number
+	grain: number
 }
 
 export type TesseractWorld = {
@@ -87,6 +89,7 @@ const BRIGHT_SHARE = 0.12
 const FOG_DENSITY = 0.055
 const BACKGROUND = 0x050505
 const FOV = 74
+const SLOW_FOV_DROP = 12
 const NEAR = 0.05
 const FAR = 70
 const MAX_PIXEL_RATIO = 1.25
@@ -174,6 +177,8 @@ const LENS_SHADER = {
 		uTime: { value: 0 },
 		uFade: { value: 0 },
 		uStreak: { value: 0 },
+		uSlow: { value: 0 },
+		uGrain: { value: 0 },
 	},
 	vertexShader: /* glsl */ `
 		varying vec2 vUv;
@@ -188,6 +193,8 @@ const LENS_SHADER = {
 		uniform float uTime;
 		uniform float uFade;
 		uniform float uStreak;
+		uniform float uSlow;
+		uniform float uGrain;
 		varying vec2 vUv;
 
 		const int STREAK_SAMPLES = 8;
@@ -195,6 +202,7 @@ const LENS_SHADER = {
 		const float RING_RADIUS = 0.44;
 		const float RING_WIDTH = 0.07;
 		const float RING_STRENGTH = 0.18;
+		const float RING_SLOW_GAIN = 0.9;
 		const float GRAIN = 0.03;
 		const float VIGNETTE_FLOOR = 0.1;
 
@@ -227,11 +235,11 @@ const LENS_SHADER = {
 
 			float offset = ( radius - RING_RADIUS ) / RING_WIDTH;
 			vec3 spectrum = 0.5 + 0.5 * cos( 6.2831 * ( offset * 0.35 + vec3( 0.0, 0.33, 0.67 ) ) );
-			color += spectrum * exp( -offset * offset ) * RING_STRENGTH * ( 0.8 + 0.2 * sin( uTime * 0.6 ) );
+			color += spectrum * exp( -offset * offset ) * RING_STRENGTH * ( 1.0 + uSlow * RING_SLOW_GAIN ) * ( 0.8 + 0.2 * sin( uTime * 0.6 ) );
 
 			float vignette = smoothstep( 1.2, 0.3, length( centered * 2.0 ) );
 			color *= mix( VIGNETTE_FLOOR, 1.0, vignette ) * uFade;
-			color += ( noise( gl_FragCoord.xy + fract( uTime ) * 100.0 ) - 0.5 ) * GRAIN;
+			color += ( noise( gl_FragCoord.xy + fract( uGrain ) * 100.0 ) - 0.5 ) * GRAIN;
 			gl_FragColor = vec4( color, 1.0 );
 		}
 	`,
@@ -573,7 +581,9 @@ function buildWorld(renderer: WebGLRenderer, beamColor: Rgb): TesseractWorld {
 	}
 
 	return {
-		render({ time, travel, look, roll, twist: twistAmount, palette, fade, streak }) {
+		render({ time, travel, look, roll, twist: twistAmount, palette, fade, streak, slow, grain }) {
+			camera.fov = FOV - SLOW_FOV_DROP * slow
+			camera.updateProjectionMatrix()
 			camera.position.set(
 				Math.sin(time * 0.31) * SWAY_X,
 				Math.cos(time * 0.23) * SWAY_Y,
@@ -597,6 +607,8 @@ function buildWorld(renderer: WebGLRenderer, beamColor: Rgb): TesseractWorld {
 			lens.uniforms.uTime.value = time
 			lens.uniforms.uFade.value = fade
 			lens.uniforms.uStreak.value = streak
+			lens.uniforms.uSlow.value = slow
+			lens.uniforms.uGrain.value = grain
 			composer.render()
 		},
 		resize(width, height) {

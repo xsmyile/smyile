@@ -37,6 +37,7 @@
 		font-family: var(--font-mono);
 		cursor: default;
 		user-select: none;
+		-webkit-touch-callout: none;
 		overscroll-behavior: none;
 	}
 

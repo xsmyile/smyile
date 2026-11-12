@@ -55,7 +55,6 @@ export function HomePage() {
 				open={fullscreen}
 				onOpenChange={setFullscreen}
 				session={session}
-				events={github.events}
 				returnFocusRef={openRef}
 			/>
 

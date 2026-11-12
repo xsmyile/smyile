@@ -68,7 +68,7 @@ src/
     └── constants.ts            # Identity, projects, network, social links, version
 ```
 
-**Data flow:** `useGitHub()` → `Promise.allSettled()` → state → terminal session (stats, fullscreen header).
+**Data flow:** `useGitHub()` → `Promise.allSettled()` → state → terminal session (`stats` command).
 
 **Activity filter:** only events from owners in `ACTIVITY_OWNERS` (own account + own orgs) reach the UI; other orgs never appear on the site.
 

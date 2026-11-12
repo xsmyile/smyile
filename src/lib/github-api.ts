@@ -139,20 +139,3 @@ export async function fetchOrgRepos(org: string) {
 		`gh_org_repos_${org}`,
 	)
 }
-
-export type ActivitySummary = {
-	activeRepo: string | null
-}
-
-export function shortRepoName(fullName: string): string {
-	return fullName.split("/").pop() ?? fullName
-}
-
-export function summarizeActivity(events: GitHubEvent[]): ActivitySummary {
-	const counts = new Map<string, number>()
-	for (const e of events) counts.set(e.repo.name, (counts.get(e.repo.name) ?? 0) + 1)
-	const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]
-	return {
-		activeRepo: top ? shortRepoName(top[0]) : null,
-	}
-}

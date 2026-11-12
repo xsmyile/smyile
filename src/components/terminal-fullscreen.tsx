@@ -11,7 +11,6 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import type { HistoryEntry, TerminalSession } from "../hooks/use-terminal-session"
-import { type GitHubEvent, summarizeActivity } from "../lib/github-api"
 import { SLASH_COMMANDS } from "../lib/terminal-commands"
 import { getVisitorId } from "../lib/visitor-id"
 import { Line, Prompt } from "./terminal-output"
@@ -31,7 +30,6 @@ type Props = {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	session: TerminalSession
-	events: GitHubEvent[]
 	returnFocusRef: RefObject<HTMLElement | null>
 }
 
@@ -72,13 +70,11 @@ function Entry({ entry, visitorId }: { entry: HistoryEntry; visitorId: string })
 
 type ViewProps = {
 	session: TerminalSession
-	events: GitHubEvent[]
 	onClose: () => void
 	reduceMotion: boolean
 }
 
-function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
-	const { activeRepo } = summarizeActivity(events)
+function FullscreenView({ session, onClose, reduceMotion }: ViewProps) {
 	const visitorId = useMemo(() => getVisitorId(), [])
 	const { history, input } = session
 	const [menuActive, setMenuActive] = useState(() => isSlashQuery(session.input))
@@ -187,17 +183,12 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 					{visitorId}@smyile
 				</span>
 				<span className="shrink-0">connected</span>
-				<span className="ml-auto hidden gap-4 sm:flex">
-					<span>
-						now <b className="font-medium text-ink">{activeRepo ?? "--"}</b>
-					</span>
-				</span>
 				<button
 					ref={closeRef}
 					type="button"
 					onClick={onClose}
 					aria-label="Close fullscreen terminal"
-					className="ml-auto shrink-0 px-1.5 py-1 transition-colors hover:text-ink focus-visible:text-ink sm:ml-0"
+					className="ml-auto shrink-0 px-1.5 py-1 transition-colors hover:text-ink focus-visible:text-ink"
 				>
 					esc ✕
 				</button>
@@ -295,7 +286,7 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 	)
 }
 
-export function TerminalFullscreen({ open, onOpenChange, session, events, returnFocusRef }: Props) {
+export function TerminalFullscreen({ open, onOpenChange, session, returnFocusRef }: Props) {
 	const reduceMotion = useReducedMotion() ?? false
 	const navigate = useNavigate()
 	const close = useCallback(() => onOpenChange(false), [onOpenChange])
@@ -349,7 +340,6 @@ export function TerminalFullscreen({ open, onOpenChange, session, events, return
 				<FullscreenView
 					key="terminal-fullscreen"
 					session={session}
-					events={events}
 					onClose={close}
 					reduceMotion={reduceMotion}
 				/>

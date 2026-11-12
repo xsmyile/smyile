@@ -1,6 +1,7 @@
 import { NETWORK, type NetworkNode, PROJECTS, type Project } from "../lib/constants"
 
 const STATUS_CLASSES: Record<Project["status"], string> = {
+	development: "text-sys-amber",
 	shipping: "text-sys-green",
 	live: "text-sys-cyan",
 	archived: "text-sys-text-dim",
@@ -37,14 +38,18 @@ function ProjectRow({ project }: { project: Project }) {
 			</p>
 			<div className="col-span-full flex flex-wrap gap-x-4 gap-y-1 font-mono text-[0.72rem] text-sys-text-dim">
 				<span>{project.stack}</span>
-				<a
-					href={project.url}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="text-sys-accent hover:underline"
-				>
-					{LINK_LABELS.web(project.url)} ↗
-				</a>
+				{project.online ? (
+					<a
+						href={project.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-sys-accent hover:underline"
+					>
+						{LINK_LABELS.web(project.url)} ↗
+					</a>
+				) : (
+					<span>{LINK_LABELS.web(project.url)}</span>
+				)}
 			</div>
 		</div>
 	)

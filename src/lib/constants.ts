@@ -6,7 +6,7 @@ export const IDENTITY = {
 	role: "Software Engineer",
 } as const
 
-export type ProjectStatus = "shipping" | "live" | "archived"
+export type ProjectStatus = "development" | "shipping" | "live" | "archived"
 
 export type Project = {
 	id: string
@@ -15,18 +15,20 @@ export type Project = {
 	stack: string
 	url: string
 	description: string
-	repo: string
+	repo: string | null
+	online: boolean
 }
 
 export const PROJECTS: readonly Project[] = [
 	{
-		id: "sissy",
-		name: "SISSY",
-		status: "shipping",
-		stack: "Swift · brew cask",
-		url: "https://sissy.smyile.com",
-		description: "The numbers you keep checking, in the macOS menu bar",
-		repo: "xsmyile/sissy",
+		id: "blackbird",
+		name: "BLACKBIRD",
+		status: "development",
+		stack: "Rust · Swift",
+		url: "https://blackbird.codes",
+		description: "Drive your coding agents from your iPhone and your Mac",
+		repo: null,
+		online: false,
 	},
 	{
 		id: "overbot",
@@ -36,6 +38,7 @@ export const PROJECTS: readonly Project[] = [
 		url: "https://overbot.net",
 		description: "Discord bot for Overwatch 2 stats and rankings",
 		repo: "xsmyile/overbot",
+		online: true,
 	},
 	{
 		id: "rustmail",
@@ -45,6 +48,17 @@ export const PROJECTS: readonly Project[] = [
 		url: "https://rustmail.app",
 		description: "Self-hosted SMTP mail catcher with web UI",
 		repo: "rustmailapp/rustmail",
+		online: true,
+	},
+	{
+		id: "sissy",
+		name: "SISSY",
+		status: "shipping",
+		stack: "Swift · brew cask",
+		url: "https://sissy.smyile.com",
+		description: "The numbers you keep checking, in the macOS menu bar",
+		repo: "xsmyile/sissy",
+		online: true,
 	},
 ]
 
@@ -57,6 +71,7 @@ export const ARCHIVED_PROJECTS: readonly Project[] = [
 		url: "https://pypi.org/project/pygicord/",
 		description: "Pagination wrapper for discord.py",
 		repo: "xsmyile/pygicord",
+		online: true,
 	},
 	{
 		id: "tmux-ccradar",
@@ -66,6 +81,7 @@ export const ARCHIVED_PROJECTS: readonly Project[] = [
 		url: "https://github.com/xsmyile/tmux-ccradar",
 		description: "Claude Code status in the tmux status bar",
 		repo: "xsmyile/tmux-ccradar",
+		online: true,
 	},
 	{
 		id: "pathfinding-visualizer",
@@ -75,6 +91,7 @@ export const ARCHIVED_PROJECTS: readonly Project[] = [
 		url: "https://github.com/xsmyile/pathfinding-visualizer",
 		description: "Dijkstra, A*, BFS and DFS drawn step by step",
 		repo: "xsmyile/pathfinding-visualizer",
+		online: true,
 	},
 ]
 

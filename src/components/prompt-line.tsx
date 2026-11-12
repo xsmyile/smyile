@@ -32,7 +32,7 @@ export function PromptLine({ session, openRef, sissyOut, onOpen }: Props) {
 	}
 
 	return (
-		<div data-quiet="" className="flex w-full flex-col items-start gap-2.5 sm:w-auto sm:items-end">
+		<div className="flex w-full flex-col items-start gap-2.5 sm:w-auto sm:items-end">
 			<form
 				ref={formRef}
 				onSubmit={(e) => {

@@ -36,7 +36,7 @@ export function HomePage() {
 
 			<main className="halo relative flex min-h-svh flex-col justify-between gap-[30vh] p-[clamp(20px,4vw,56px)] text-sm leading-relaxed">
 				<div className="flex flex-wrap items-start justify-between gap-6">
-					<header data-quiet="">
+					<header>
 						<h1 className="font-display text-[clamp(30px,3vw,42px)] leading-none">
 							{IDENTITY.name}
 						</h1>

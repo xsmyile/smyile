@@ -3,7 +3,7 @@ export const SITE_VERSION = __APP_VERSION__
 
 export const IDENTITY = {
 	name: "Smyile",
-	role: "Software Engineer / AI",
+	role: "Software Engineer",
 } as const
 
 export type ProjectStatus = "shipping" | "live" | "archived"
@@ -82,13 +82,6 @@ export const SOCIAL_LINKS = [
 	{ label: "GitHub", url: `https://github.com/${GITHUB_USERNAME}` },
 	{ label: "Hugging Face", url: "https://huggingface.co/smyile" },
 	{ label: "Steam", url: "https://steamcommunity.com/id/Smyile/" },
-] as const
-
-export const SPECIALIZATIONS = [
-	"Systems Architecture",
-	"Reverse Engineering",
-	"LLM Fine-Tuning",
-	"Model Training & Optimization",
 ] as const
 
 export type NetworkLinkKind = "web" | "github" | "huggingface"

@@ -41,7 +41,7 @@ export function ProjectList() {
 			</article>
 			{rest.map((project) => (
 				<div key={project.id} className="flex justify-between gap-3">
-					<span>
+					<span title={project.description}>
 						{project.name}
 						<span className="sr-only">: {project.description}</span>
 					</span>

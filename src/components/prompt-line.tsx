@@ -1,33 +1,34 @@
 import { type RefObject, useMemo, useRef } from "react"
 import type { TerminalSession } from "../hooks/use-terminal-session"
+import { commandName, EXIT_COMMAND } from "../lib/terminal-commands"
 import { getVisitorId } from "../lib/visitor-id"
 import { Prompt } from "./terminal-output"
 
 const INPUT_ID = "prompt-line"
 const INPUT_MAX_LENGTH = 200
 const TOUCH_COMMANDS = ["help", "ls projects", "neofetch"] as const
-const EXIT_COMMANDS: ReadonlySet<string> = new Set(["/exit"])
-const IN_PLACE_COMMANDS: ReadonlySet<string> = new Set(["clear", "/clear", "sissy", "/sissy"])
 
 type Props = {
 	session: TerminalSession
 	openRef: RefObject<HTMLButtonElement | null>
+	sissyOut: boolean
 	onOpen: () => void
 }
 
 /** One-line prompt: a command runs in the session and opens the fullscreen terminal on its output. */
-export function PromptLine({ session, openRef, onOpen }: Props) {
+export function PromptLine({ session, openRef, sissyOut, onOpen }: Props) {
 	const visitorId = useMemo(() => getVisitorId(), [])
 	const formRef = useRef<HTMLFormElement>(null)
 
 	function run(command: string) {
-		const name = command.trim().split(/\s+/)[0] ?? ""
-		if (EXIT_COMMANDS.has(name)) {
+		const name = commandName(command)
+		if (name === EXIT_COMMAND) {
 			session.setInput("")
 			return
 		}
 		session.run(command, { anchor: formRef.current })
-		if (!IN_PLACE_COMMANDS.has(name)) onOpen()
+		const inPlace = name === "clear" || (name === "sissy" && !sissyOut)
+		if (!inPlace) onOpen()
 	}
 
 	return (

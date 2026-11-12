@@ -43,7 +43,12 @@ export function HomePage() {
 						</h1>
 						<p className="mt-3.5 text-muted">{IDENTITY.role}</p>
 					</header>
-					<PromptLine session={session} openRef={openRef} onOpen={() => setFullscreen(true)} />
+					<PromptLine
+						session={session}
+						openRef={openRef}
+						sissyOut={petOrigin !== null}
+						onOpen={() => setFullscreen(true)}
+					/>
 				</div>
 				<div className="flex flex-wrap items-end justify-between gap-8">
 					<ProjectList />

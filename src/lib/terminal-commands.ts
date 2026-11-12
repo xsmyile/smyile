@@ -54,7 +54,7 @@ const SLASH_ALIASES: Record<string, string> = {
 	"/clear": "clear",
 }
 
-const EXIT_COMMAND = "/exit"
+export const EXIT_COMMAND = "/exit"
 const SHORTCUTS_COMMAND = "?"
 const NO_EFFECTS = { clear: false, summonSissy: false, exit: false } as const
 
@@ -338,6 +338,13 @@ function executeSlash(cmd: string, args: string[], ctx: TerminalContext): Comman
 	const result = executeCommand([alias, ...args].join(" "), ctx)
 	if (cmd === "/help") return { ...result, output: [...result.output, ...slashHelp()] }
 	return result
+}
+
+/** The command an input resolves to, with slash aliases expanded: "/sissy" becomes "sissy". */
+export function commandName(input: string): string {
+	const [cmd = ""] = input.trim().split(/\s+/)
+	const alias = SLASH_ALIASES[cmd]
+	return alias ? alias.split(" ")[0] : cmd
 }
 
 export function completeInput(input: string): { value: string; candidates: string[] } {

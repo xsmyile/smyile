@@ -6,7 +6,6 @@ import {
 	PROJECTS,
 	type Project,
 	SITE_VERSION,
-	SPECIALIZATIONS,
 } from "./constants"
 import type { GitHubEvent, GitHubUser } from "./github-api"
 import { getVisitorId } from "./visitor-id"
@@ -239,7 +238,6 @@ const COMMANDS: Record<string, CommandHandler> = {
 		{ text: `  version: v${SITE_VERSION}` },
 		{ text: `  uptime:  ${ctx.uptime}` },
 		{ text: `  stars:   ${ctx.totalStars}`, color: STARS },
-		{ text: `  skills:  ${SPECIALIZATIONS.join(", ")}` },
 		{ text: `  orgs:    ${NETWORK.map((n) => n.id).join(", ")}` },
 	],
 

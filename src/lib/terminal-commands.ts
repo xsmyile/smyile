@@ -122,7 +122,7 @@ export function getWelcomeMessage(): OutputLine[] {
 
 function projectLine(p: Project): OutputLine {
 	return {
-		text: `  ${p.name.padEnd(12)} ${`[${p.status.toUpperCase()}]`.padEnd(11)} ${p.description}`,
+		text: `  ${p.name.padEnd(12)} ${`[${p.status.toUpperCase()}]`.padEnd(14)} ${p.description}`,
 		color: p.status === "archived" ? DIM : undefined,
 	}
 }
@@ -209,14 +209,18 @@ const COMMANDS: Record<string, CommandHandler> = {
 			{ text: `${project.name}  [${project.status.toUpperCase()}]`, color: ACCENT },
 			{ text: `  ${project.description}` },
 			{ text: `  stack: ${project.stack}` },
-			{ text: `  repo:  ${project.repo}` },
-			{ text: `  url:   ${host(project.url)}`, color: LINK, href: project.url },
+			...(project.repo ? [{ text: `  repo:  ${project.repo}` }] : []),
+			project.online
+				? { text: `  url:   ${host(project.url)}`, color: LINK, href: project.url }
+				: { text: `  url:   ${host(project.url)} (not online yet)`, color: DIM },
 		]
 	},
 
 	open: (args) => {
 		const project = findProject(args)
 		if (!project) return [{ text: `open: unknown target '${echoArg(args)}'`, color: ERROR }]
+		if (!project.online)
+			return [{ text: `open: ${host(project.url)} is not online yet`, color: DIM }]
 		return [{ text: `→ ${host(project.url)}`, color: LINK, href: project.url }]
 	},
 
@@ -246,6 +250,14 @@ const COMMANDS: Record<string, CommandHandler> = {
 	ping: (args) => {
 		const project = findProject(args)
 		if (!project) return [{ text: `ping: unknown host '${echoArg(args)}'`, color: ERROR }]
+		if (!project.online) {
+			return [
+				{ text: `PING ${project.id} (${host(project.url)})` },
+				{ text: "Request timeout for icmp_seq 0", color: ERROR },
+				{ text: `--- ${project.id} ping statistics ---` },
+				{ text: "1 packet transmitted, 0 received, 100% packet loss" },
+			]
+		}
 		const ms = Math.floor(Math.random() * 30) + 5
 		return [
 			{ text: `PING ${project.id} (${host(project.url)})` },

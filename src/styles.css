@@ -37,6 +37,7 @@
 		font-family: var(--font-mono);
 		cursor: default;
 		user-select: none;
+		overscroll-behavior: none;
 	}
 
 	::-webkit-scrollbar {

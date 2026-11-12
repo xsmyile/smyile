@@ -4,7 +4,7 @@ Guidance for coding agents working in this repository.
 
 ## Project
 
-Personal site (https://smyile.com): cyberpunk-themed, terminal-first SPA with GitHub activity, projects and network. Deployed to GitHub Pages on every `master` push.
+Personal site (https://smyile.com): minimal, monochrome SPA over a dithered tesseract, with projects, links and a terminal. Deployed to GitHub Pages on every `master` push.
 
 ## Tech Stack
 
@@ -12,7 +12,7 @@ Personal site (https://smyile.com): cyberpunk-themed, terminal-first SPA with Gi
 - **Vite 8** (build tool)
 - **TanStack Router** (type-safe file-based routing, single index route)
 - **Tailwind CSS v4** + custom CSS theme variables (`src/styles.css`)
-- **Framer Motion** (animations)
+- **Framer Motion** (fullscreen terminal transition)
 - **Biome** (linter + formatter — no eslint/prettier)
 
 ## Commands
@@ -36,28 +36,31 @@ CI uses `bun install --frozen-lockfile` and `bun run build`.
 
 ## Architecture
 
-**Single-page app** with one route (`/`), terminal-first ("Signal" layout): name, status readout and a large terminal above the fold, projects and network below.
+**Single-page app** with one route (`/`): a full-screen dithered tesseract behind four corners of text. Top left the contour wordmark and the role, top right the one-line prompt, bottom left the projects (the first one featured), bottom right orgs and social links.
 
 ```
 src/
 ├── main.tsx                    # React 19 root + router setup
-├── styles.css                  # Theme variables, custom animations, global styles
+├── styles.css                  # Color tokens (:root + @theme inline), Sissy animations
 ├── routes/route-tree.ts        # TanStack Router tree (single index route)
 ├── components/
-│   ├── signal-page.tsx         # Page shell: boot, background, ticker, hero, sections, Sissy pet
-│   ├── signal-hero.tsx         # whoami reveal, name, readout (last push, active repo)
-│   ├── terminal-window.tsx     # Interactive terminal (history, Tab completion, touch-only chips)
-│   ├── terminal-fullscreen.tsx # Edge-to-edge TTY fullscreen terminal (⤢, Ctrl+K, /#terminal)
-│   ├── signal-sections.tsx     # Projects list + network tree
+│   ├── home-page.tsx           # Page shell: backdrop, corners, fullscreen terminal, Sissy pet
+│   ├── home-sections.tsx       # Projects list and orgs/social links
+│   ├── tesseract-backdrop.tsx  # Canvas loop for the tesseract scene (pointer, click, reduced motion)
+│   ├── wordmark.tsx            # "Smyile" as dithered contours on an Unbounded 800 mask
+│   ├── prompt-line.tsx         # One-line prompt: runs a command and opens the fullscreen terminal
+│   ├── terminal-fullscreen.tsx # Edge-to-edge TTY fullscreen terminal (Ctrl+K, /#terminal)
+│   ├── terminal-output.tsx     # Shared output line and prompt rendering
 │   ├── sissy-pet.tsx           # Draggable, blinking Sissy easter egg (spawned only by `sissy`)
-│   ├── ticker-strip.tsx        # Top marquee of recent activity
-│   └── boot-sequence.tsx       # Splash animation (skipped on revisit via sessionStorage)
+│   └── stale-reload-boundary.tsx # Reloads once when a stale chunk fails after a deploy
 ├── hooks/
 │   ├── use-github.ts           # Profile, events (owner-filtered), star totals
-│   ├── use-boot-sequence.ts    # Boot animation timing + state
 │   ├── use-terminal-session.ts # Shared terminal history, input and key handling
 │   └── use-uptime.ts           # Session timer
 └── lib/
+    ├── tesseract-scene.ts      # Tesseract, corridor and strings rasterized to a dithered buffer
+    ├── contour-wordmark.ts     # Distance field and flowing contours for the wordmark
+    ├── dither.ts               # Bayer threshold, RGBA writes, CSS color tokens
     ├── github-api.ts           # GitHub REST client with localStorage caching (5-min TTL)
     ├── terminal-commands.ts    # CLI command handlers and Tab completion
     ├── sissy-silhouette.ts     # SVG paths from the Sissy app (body + separate eye)
@@ -65,13 +68,15 @@ src/
     └── constants.ts            # Identity, projects, network, social links, version
 ```
 
-**Data flow:** `useGitHub()` → `Promise.allSettled()` → state → props to hero/terminal/ticker.
+**Data flow:** `useGitHub()` → `Promise.allSettled()` → state → terminal session (stats, fullscreen header).
 
 **Activity filter:** only events from owners in `ACTIVITY_OWNERS` (own account + own orgs) reach the UI; other orgs never appear on the site.
 
 **Caching:** localStorage with `smyile_{VERSION}_` prefix, 5-min TTL, stale fallback on API errors. Keys of other versions auto-purged on load; unversioned keys (`smyile_last_login`) persist across deploys.
 
-**Responsive:** one column that stacks; projects and network sit side by side from 900px. Terminal command chips show only on touch (`pointer: coarse`).
+**Readability:** elements marked `data-quiet` are quiet zones: the backdrop fades to nothing under them, so text stays legible over the scene.
+
+**Responsive:** the corners stack on narrow screens; the backdrop uses 3px cells under 700px. Terminal command chips show only on touch (`pointer: coarse`).
 
 ## Release Process
 

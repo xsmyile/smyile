@@ -99,7 +99,7 @@ export function useTerminalSession({
 			if (value === input && candidates.length === 0) return
 			e.preventDefault()
 			if (candidates.length > 1)
-				append(input, [{ text: candidates.join("   "), color: "var(--color-sys-text-dim)" }])
+				append(input, [{ text: candidates.join("   "), color: "var(--muted)" }])
 			setRawInput(value)
 		} else if (e.key === "ArrowUp") {
 			e.preventDefault()

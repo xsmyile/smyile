@@ -7,7 +7,6 @@ export type GitHubData = {
 	user: GitHubUser | null
 	totalStars: number
 	events: GitHubEvent[]
-	eventsFailed: boolean
 }
 
 const FILTERED_EVENTS = new Set(["WatchEvent", "IssueCommentEvent"])
@@ -27,7 +26,6 @@ export function useGitHub(): GitHubData {
 		user: null,
 		totalStars: 0,
 		events: [],
-		eventsFailed: false,
 	})
 
 	useEffect(() => {
@@ -49,7 +47,6 @@ export function useGitHub(): GitHubData {
 				user: userResult.status === "fulfilled" ? userResult.value.data : null,
 				totalStars: sumStars(repoSets),
 				events: eventsResult.status === "fulfilled" ? filterEvents(eventsResult.value.data) : [],
-				eventsFailed: eventsResult.status === "rejected",
 			})
 		}
 

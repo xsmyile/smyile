@@ -46,13 +46,13 @@ export class StaleReloadBoundary extends Component<Props, State> {
 		if (this.state.reloading) return null
 		if (this.state.hasError) {
 			return (
-				<div className="flex h-screen items-center justify-center bg-sys-bg font-mono text-sys-text-dim">
+				<div className="flex h-screen items-center justify-center bg-ground font-mono text-muted">
 					<div className="text-center">
 						<p className="text-sm">something went wrong</p>
 						<button
 							type="button"
 							onClick={() => window.location.reload()}
-							className="mt-3 text-xs text-sys-accent underline"
+							className="mt-3 text-xs text-ink underline"
 						>
 							reload
 						</button>

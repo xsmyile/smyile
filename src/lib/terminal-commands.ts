@@ -54,16 +54,16 @@ const SLASH_ALIASES: Record<string, string> = {
 	"/clear": "clear",
 }
 
-const EXIT_COMMAND = "/exit"
+export const EXIT_COMMAND = "/exit"
 const SHORTCUTS_COMMAND = "?"
 const NO_EFFECTS = { clear: false, summonSissy: false, exit: false } as const
 
-const ACCENT = "var(--color-sys-accent)"
-const DIM = "var(--color-sys-text-dim)"
-const ERROR = "var(--color-sys-magenta)"
-const LINK = "var(--color-sys-cyan)"
-const OK = "var(--color-sys-green)"
-const STARS = "var(--color-sys-amber)"
+const ACCENT = "var(--ink)"
+const DIM = "var(--muted)"
+const ERROR = "var(--alert)"
+const LINK = "var(--ink)"
+const OK = "var(--soft)"
+const STARS = "var(--ink)"
 
 const SISSY_URL = "https://sissy.smyile.com"
 const SISSY_BREW = "brew install --cask xsmyile/sissy/sissy"
@@ -121,7 +121,7 @@ export function getWelcomeMessage(): OutputLine[] {
 
 function projectLine(p: Project): OutputLine {
 	return {
-		text: `  ${p.name.padEnd(12)} ${`[${p.status.toUpperCase()}]`.padEnd(14)} ${p.description}`,
+		text: `  ${p.name.toUpperCase().padEnd(12)} ${`[${p.status.toUpperCase()}]`.padEnd(14)} ${p.description}`,
 		color: p.status === "archived" ? DIM : undefined,
 	}
 }
@@ -129,7 +129,7 @@ function projectLine(p: Project): OutputLine {
 function networkLines(node: NetworkNode, depth: number): OutputLine[] {
 	const indent = depth === 0 ? "" : "└─ "
 	const head: OutputLine = {
-		text: `${indent}${node.label.padEnd(14 - indent.length)} ${node.role}`,
+		text: `${indent}${node.label.toUpperCase().padEnd(14 - indent.length)} ${node.role}`,
 		color: ACCENT,
 	}
 	const links = node.links.map((l) => ({
@@ -205,7 +205,7 @@ const COMMANDS: Record<string, CommandHandler> = {
 			return [{ text: `cat: ${echoArg(args)}: No such file or directory`, color: ERROR }]
 		}
 		return [
-			{ text: `${project.name}  [${project.status.toUpperCase()}]`, color: ACCENT },
+			{ text: `${project.name.toUpperCase()}  [${project.status.toUpperCase()}]`, color: ACCENT },
 			{ text: `  ${project.description}` },
 			{ text: `  stack: ${project.stack}` },
 			...(project.repo ? [{ text: `  repo:  ${project.repo}` }] : []),
@@ -338,6 +338,13 @@ function executeSlash(cmd: string, args: string[], ctx: TerminalContext): Comman
 	const result = executeCommand([alias, ...args].join(" "), ctx)
 	if (cmd === "/help") return { ...result, output: [...result.output, ...slashHelp()] }
 	return result
+}
+
+/** The command an input resolves to, with slash aliases expanded: "/sissy" becomes "sissy". */
+export function commandName(input: string): string {
+	const [cmd = ""] = input.trim().split(/\s+/)
+	const alias = SLASH_ALIASES[cmd]
+	return alias ? alias.split(" ")[0] : cmd
 }
 
 export function completeInput(input: string): { value: string; candidates: string[] } {

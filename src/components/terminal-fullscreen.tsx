@@ -11,10 +11,9 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import type { HistoryEntry, TerminalSession } from "../hooks/use-terminal-session"
-import { type GitHubEvent, summarizeActivity } from "../lib/github-api"
 import { SLASH_COMMANDS } from "../lib/terminal-commands"
 import { getVisitorId } from "../lib/visitor-id"
-import { Line, Prompt } from "./terminal-window"
+import { Line, Prompt } from "./terminal-output"
 
 const TERMINAL_HASH_ID = "terminal"
 const TERMINAL_INPUT_ATTR = "data-terminal-input"
@@ -31,8 +30,7 @@ type Props = {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	session: TerminalSession
-	events: GitHubEvent[]
-	returnFocusRef: RefObject<HTMLButtonElement | null>
+	returnFocusRef: RefObject<HTMLElement | null>
 }
 
 function isOtherTextField(el: Element | null): boolean {
@@ -59,7 +57,7 @@ function Entry({ entry, visitorId }: { entry: HistoryEntry; visitorId: string })
 			{entry.command && (
 				<div className="whitespace-pre-wrap wrap-break-word">
 					<Prompt id={visitorId} />
-					<span className="text-sys-text">{entry.command}</span>
+					<span className="text-ink">{entry.command}</span>
 				</div>
 			)}
 			{entry.output.map((line, j) => (
@@ -72,13 +70,11 @@ function Entry({ entry, visitorId }: { entry: HistoryEntry; visitorId: string })
 
 type ViewProps = {
 	session: TerminalSession
-	events: GitHubEvent[]
 	onClose: () => void
 	reduceMotion: boolean
 }
 
-function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
-	const { activeRepo } = summarizeActivity(events)
+function FullscreenView({ session, onClose, reduceMotion }: ViewProps) {
 	const visitorId = useMemo(() => getVisitorId(), [])
 	const { history, input } = session
 	const [menuActive, setMenuActive] = useState(() => isSlashQuery(session.input))
@@ -179,28 +175,20 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 			exit={hidden}
 			transition={transition}
 			onKeyDown={trapFocus}
-			className="terminal-screen fixed inset-0 z-50 flex flex-col font-mono text-sm leading-relaxed text-sys-text"
+			className="fixed inset-0 z-50 flex flex-col bg-ground font-mono text-sm leading-relaxed text-ink"
 		>
-			<div className="flex shrink-0 items-center gap-4 border-b border-sys-border px-[clamp(16px,2.4vw,28px)] py-2.5 text-[0.7rem] tracking-[0.18em] text-sys-text-dim uppercase">
+			<div className="flex shrink-0 items-center gap-4 border-b border-line px-[clamp(16px,2.4vw,28px)] py-2.5 text-[0.7rem] tracking-[0.18em] text-muted uppercase">
 				<span className="truncate">
 					{"TTY // "}
 					{visitorId}@smyile
 				</span>
-				<span className="flex shrink-0 items-center gap-2 text-sys-green">
-					<span className="led led-pulse" />
-					connected
-				</span>
-				<span className="ml-auto hidden gap-4 sm:flex">
-					<span>
-						now <b className="font-medium text-sys-text">{activeRepo ?? "--"}</b>
-					</span>
-				</span>
+				<span className="shrink-0">connected</span>
 				<button
 					ref={closeRef}
 					type="button"
 					onClick={onClose}
 					aria-label="Close fullscreen terminal"
-					className="ml-auto shrink-0 px-1.5 py-1 transition-colors hover:text-sys-magenta focus-visible:text-sys-magenta sm:ml-0"
+					className="ml-auto shrink-0 px-1.5 py-1 transition-colors hover:text-ink focus-visible:text-ink"
 				>
 					esc ✕
 				</button>
@@ -211,7 +199,7 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 			<div
 				ref={scrollRef}
 				aria-live="polite"
-				className="terminal-glow min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-[clamp(16px,2.4vw,28px)] pt-5 select-text"
+				className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-[clamp(16px,2.4vw,28px)] pt-5 select-text"
 				onClick={() => {
 					if (!window.getSelection()?.toString()) inputRef.current?.focus({ preventScroll: true })
 				}}
@@ -226,14 +214,14 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 					e.preventDefault()
 					run(input)
 				}}
-				className="shrink-0 border-t border-sys-border bg-[rgba(4,4,6,0.7)] px-[clamp(16px,2.4vw,28px)] pt-3 pb-3.5"
+				className="shrink-0 border-t border-line bg-ground px-[clamp(16px,2.4vw,28px)] pt-3 pb-3.5"
 			>
 				{menuOpen && (
 					<div
 						id={MENU_ID}
 						role="listbox"
 						aria-label="Slash commands"
-						className="mb-2 border border-sys-border-strong bg-[rgba(5,5,8,0.94)] text-[0.8rem]"
+						className="mb-2 border border-line-strong bg-ground text-[0.8rem]"
 					>
 						{matches.map((c, i) => (
 							<div
@@ -246,10 +234,10 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 									e.preventDefault()
 									run(c.name)
 								}}
-								className={`flex cursor-pointer gap-4 px-3.5 py-1 ${i === activeIndex ? "bg-sys-accent/10 text-sys-text" : "text-sys-text-dim"}`}
+								className={`flex cursor-pointer gap-4 px-3.5 py-1 ${i === activeIndex ? "bg-ink/10 text-ink" : "text-muted"}`}
 							>
 								<span
-									className={`w-[12ch] shrink-0 ${i === activeIndex ? "text-sys-accent" : "text-sys-text-soft"}`}
+									className={`w-[12ch] shrink-0 ${i === activeIndex ? "text-ink" : "text-soft"}`}
 								>
 									{c.name}
 								</span>
@@ -279,14 +267,14 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 						onKeyDown={handleKeyDown}
 						maxLength={INPUT_MAX_LENGTH}
 						placeholder="type help, or / for commands"
-						className="min-w-0 flex-1 bg-transparent text-base text-sys-text caret-sys-accent outline-none placeholder:text-sys-text-faint sm:text-sm"
+						className="min-w-0 flex-1 bg-transparent text-base text-ink caret-ink outline-none placeholder:text-faint sm:text-sm"
 						spellCheck={false}
 						autoComplete="off"
 						autoCapitalize="none"
 					/>
 				</div>
 
-				<div className="mt-2 flex flex-wrap justify-between gap-x-4 gap-y-1 text-[0.7rem] tracking-wider text-sys-text-faint">
+				<div className="mt-2 flex flex-wrap justify-between gap-x-4 gap-y-1 text-[0.7rem] tracking-wider text-faint">
 					<span>
 						<kbd className="kbd">tab</kbd> complete · <kbd className="kbd">↑↓</kbd> history ·{" "}
 						<kbd className="kbd">/</kbd> commands · <kbd className="kbd">?</kbd> shortcuts
@@ -298,7 +286,7 @@ function FullscreenView({ session, events, onClose, reduceMotion }: ViewProps) {
 	)
 }
 
-export function TerminalFullscreen({ open, onOpenChange, session, events, returnFocusRef }: Props) {
+export function TerminalFullscreen({ open, onOpenChange, session, returnFocusRef }: Props) {
 	const reduceMotion = useReducedMotion() ?? false
 	const navigate = useNavigate()
 	const close = useCallback(() => onOpenChange(false), [onOpenChange])
@@ -352,7 +340,6 @@ export function TerminalFullscreen({ open, onOpenChange, session, events, return
 				<FullscreenView
 					key="terminal-fullscreen"
 					session={session}
-					events={events}
 					onClose={close}
 					reduceMotion={reduceMotion}
 				/>

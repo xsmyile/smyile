@@ -22,7 +22,7 @@ export type Project = {
 export const PROJECTS: readonly Project[] = [
 	{
 		id: "blackbird",
-		name: "BLACKBIRD",
+		name: "Blackbird",
 		status: "development",
 		stack: "Rust · Swift",
 		url: "https://blackbird.codes",
@@ -32,7 +32,7 @@ export const PROJECTS: readonly Project[] = [
 	},
 	{
 		id: "overbot",
-		name: "OVERBOT",
+		name: "Overbot",
 		status: "live",
 		stack: "Discord",
 		url: "https://overbot.net",
@@ -42,7 +42,7 @@ export const PROJECTS: readonly Project[] = [
 	},
 	{
 		id: "rustmail",
-		name: "RUSTMAIL",
+		name: "Rustmail",
 		status: "shipping",
 		stack: "Rust · nvim plugin",
 		url: "https://rustmail.app",
@@ -52,7 +52,7 @@ export const PROJECTS: readonly Project[] = [
 	},
 	{
 		id: "sissy",
-		name: "SISSY",
+		name: "Sissy",
 		status: "shipping",
 		stack: "Swift · brew cask",
 		url: "https://sissy.smyile.com",
@@ -65,7 +65,7 @@ export const PROJECTS: readonly Project[] = [
 export const ARCHIVED_PROJECTS: readonly Project[] = [
 	{
 		id: "pygicord",
-		name: "PYGICORD",
+		name: "Pygicord",
 		status: "archived",
 		stack: "Python",
 		url: "https://pypi.org/project/pygicord/",
@@ -75,7 +75,7 @@ export const ARCHIVED_PROJECTS: readonly Project[] = [
 	},
 	{
 		id: "tmux-ccradar",
-		name: "TMUX-CCRADAR",
+		name: "tmux-ccradar",
 		status: "archived",
 		stack: "Shell",
 		url: "https://github.com/xsmyile/tmux-ccradar",
@@ -85,7 +85,7 @@ export const ARCHIVED_PROJECTS: readonly Project[] = [
 	},
 	{
 		id: "pathfinding-visualizer",
-		name: "PATHFINDING-VISUALIZER",
+		name: "pathfinding-visualizer",
 		status: "archived",
 		stack: "Python · pygame",
 		url: "https://github.com/xsmyile/pathfinding-visualizer",
@@ -115,7 +115,7 @@ export type NetworkNode = {
 export const NETWORK: readonly NetworkNode[] = [
 	{
 		id: "radonforge",
-		label: "RADON FORGE",
+		label: "Radon Forge",
 		role: "studio",
 		tagline: "Independent studio.",
 		parent: null,
@@ -126,7 +126,7 @@ export const NETWORK: readonly NetworkNode[] = [
 	},
 	{
 		id: "obliolabs",
-		label: "OBLIO LABS",
+		label: "Oblio Labs",
 		role: "research",
 		tagline: "Measuring what models forget.",
 		parent: "radonforge",

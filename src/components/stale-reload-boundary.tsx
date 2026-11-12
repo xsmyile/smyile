@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from "react"
+import { tryStorage } from "../lib/storage"
 
 const RELOAD_KEY = "smyile_reload_attempted"
 
@@ -6,23 +7,14 @@ type Props = { children: ReactNode }
 type State = { hasError: boolean; reloading: boolean }
 
 function getSessionFlag(): boolean {
-	try {
-		return sessionStorage.getItem(RELOAD_KEY) === "1"
-	} catch {
-		return false
-	}
+	return tryStorage(() => sessionStorage.getItem(RELOAD_KEY) === "1", false)
 }
 
 function setSessionFlag(value: boolean) {
-	try {
-		if (value) {
-			sessionStorage.setItem(RELOAD_KEY, "1")
-		} else {
-			sessionStorage.removeItem(RELOAD_KEY)
-		}
-	} catch {
-		// sessionStorage unavailable (private browsing, etc.)
-	}
+	tryStorage(() => {
+		if (value) sessionStorage.setItem(RELOAD_KEY, "1")
+		else sessionStorage.removeItem(RELOAD_KEY)
+	}, undefined)
 }
 
 export class StaleReloadBoundary extends Component<Props, State> {

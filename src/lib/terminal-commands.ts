@@ -8,6 +8,8 @@ import {
 	SITE_VERSION,
 } from "./constants"
 import type { GitHubEvent, GitHubUser } from "./github-api"
+import { tryStorage } from "./storage"
+import { displayHost } from "./url"
 import { getVisitorId } from "./visitor-id"
 
 export type OutputLine = {
@@ -76,10 +78,6 @@ const LINK_LABELS: Record<NetworkNode["links"][number]["kind"], string> = {
 	huggingface: "hf",
 }
 
-function host(url: string): string {
-	return url.replace(/^https?:\/\//, "").replace(/\/$/, "")
-}
-
 function echoArg(args: string): string {
 	return args.trim().slice(0, ARG_ECHO_LIMIT) || "?"
 }
@@ -102,16 +100,9 @@ function formatLoginDate(date: Date): string {
 }
 
 export function getWelcomeMessage(): OutputLine[] {
-	let lastLogin: string | null = null
-	try {
-		lastLogin = localStorage.getItem(LAST_LOGIN_KEY)
-	} catch {}
-
+	const lastLogin = tryStorage(() => localStorage.getItem(LAST_LOGIN_KEY), null)
 	const displayDate = lastLogin ? new Date(lastLogin) : new Date()
-
-	try {
-		localStorage.setItem(LAST_LOGIN_KEY, new Date().toISOString())
-	} catch {}
+	tryStorage(() => localStorage.setItem(LAST_LOGIN_KEY, new Date().toISOString()), undefined)
 
 	return [
 		{ text: `Last login: ${formatLoginDate(displayDate)} on ttys040` },
@@ -133,7 +124,7 @@ function networkLines(node: NetworkNode, depth: number): OutputLine[] {
 		color: ACCENT,
 	}
 	const links = node.links.map((l) => ({
-		text: `${"   ".repeat(depth + 1)}${LINK_LABELS[l.kind].padEnd(7)} ${host(l.url)}`,
+		text: `${"   ".repeat(depth + 1)}${LINK_LABELS[l.kind].padEnd(7)} ${displayHost(l.url)}`,
 		color: LINK,
 		href: l.url,
 	}))
@@ -210,8 +201,8 @@ const COMMANDS: Record<string, CommandHandler> = {
 			{ text: `  stack: ${project.stack}` },
 			...(project.repo ? [{ text: `  repo:  ${project.repo}` }] : []),
 			project.online
-				? { text: `  url:   ${host(project.url)}`, color: LINK, href: project.url }
-				: { text: `  url:   ${host(project.url)} (not online yet)`, color: DIM },
+				? { text: `  url:   ${displayHost(project.url)}`, color: LINK, href: project.url }
+				: { text: `  url:   ${displayHost(project.url)} (not online yet)`, color: DIM },
 		]
 	},
 
@@ -219,8 +210,8 @@ const COMMANDS: Record<string, CommandHandler> = {
 		const project = findProject(args)
 		if (!project) return [{ text: `open: unknown target '${echoArg(args)}'`, color: ERROR }]
 		if (!project.online)
-			return [{ text: `open: ${host(project.url)} is not online yet`, color: DIM }]
-		return [{ text: `→ ${host(project.url)}`, color: LINK, href: project.url }]
+			return [{ text: `open: ${displayHost(project.url)} is not online yet`, color: DIM }]
+		return [{ text: `→ ${displayHost(project.url)}`, color: LINK, href: project.url }]
 	},
 
 	stats: (_args, ctx) => {
@@ -250,7 +241,7 @@ const COMMANDS: Record<string, CommandHandler> = {
 		if (!project) return [{ text: `ping: unknown host '${echoArg(args)}'`, color: ERROR }]
 		if (!project.online) {
 			return [
-				{ text: `PING ${project.id} (${host(project.url)})` },
+				{ text: `PING ${project.id} (${displayHost(project.url)})` },
 				{ text: "Request timeout for icmp_seq 0", color: ERROR },
 				{ text: `--- ${project.id} ping statistics ---` },
 				{ text: "1 packet transmitted, 0 received, 100% packet loss" },
@@ -258,7 +249,7 @@ const COMMANDS: Record<string, CommandHandler> = {
 		}
 		const ms = Math.floor(Math.random() * 30) + 5
 		return [
-			{ text: `PING ${project.id} (${host(project.url)})` },
+			{ text: `PING ${project.id} (${displayHost(project.url)})` },
 			{ text: `64 bytes: time=${ms}ms`, color: OK },
 			{ text: `--- ${project.id} ping statistics ---` },
 			{ text: "1 packet transmitted, 1 received, 0% packet loss" },
@@ -272,7 +263,7 @@ const COMMANDS: Record<string, CommandHandler> = {
 			{ text: "  SISSY  macOS menu bar · free & open-source", color: ACCENT },
 			{ text: "  The numbers you keep checking, in the macOS menu bar." },
 			{ text: `  $ ${SISSY_BREW}`, color: STARS },
-			{ text: `  → ${host(SISSY_URL)}`, color: LINK, href: SISSY_URL },
+			{ text: `  → ${displayHost(SISSY_URL)}`, color: LINK, href: SISSY_URL },
 			{ text: "  sissy is out. drag to move.", color: DIM },
 		]
 	},

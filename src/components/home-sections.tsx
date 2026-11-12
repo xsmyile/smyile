@@ -1,4 +1,6 @@
+import type { ReactNode } from "react"
 import { NETWORK, PROJECTS, type Project, type ProjectStatus, SOCIAL_LINKS } from "../lib/constants"
+import { displayHost } from "../lib/url"
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
 	development: "in development",
@@ -7,17 +9,33 @@ const STATUS_LABELS: Record<ProjectStatus, string> = {
 	archived: "archived",
 }
 
-function host(url: string): string {
-	return url.replace(/^https?:\/\//, "").replace(/\/$/, "")
+type LinkItem = { key: string; label: string; url: string }
+
+function ExternalLink({ url, children }: { url: string; children: ReactNode }) {
+	return (
+		<a href={url} target="_blank" rel="noopener noreferrer" className="link">
+			{children}
+		</a>
+	)
+}
+
+function LinkRow({ items }: { items: readonly LinkItem[] }) {
+	return (
+		<span>
+			{items.map((item, i) => (
+				<span key={item.key}>
+					{i > 0 && <span className="text-muted"> · </span>}
+					<ExternalLink url={item.url}>{item.label}</ExternalLink>
+				</span>
+			))}
+		</span>
+	)
 }
 
 function ProjectLink({ project }: { project: Project }) {
-	if (!project.online) return <span className="text-xs text-faint">{host(project.url)}</span>
-	return (
-		<a href={project.url} target="_blank" rel="noopener noreferrer" className="link">
-			{host(project.url)}
-		</a>
-	)
+	const label = displayHost(project.url)
+	if (!project.online) return <span className="text-xs text-faint">{label}</span>
+	return <ExternalLink url={project.url}>{label}</ExternalLink>
 }
 
 export function ProjectList() {
@@ -55,34 +73,17 @@ export function ProjectList() {
 export function Elsewhere() {
 	const orgs = NETWORK.flatMap((node) => {
 		const web = node.links.find((link) => link.kind === "web")
-		return web ? [{ id: node.id, label: node.label, url: web.url }] : []
+		return web ? [{ key: node.id, label: node.label, url: web.url }] : []
 	})
+	const social = SOCIAL_LINKS.map((link) => ({ key: link.label, label: link.label, url: link.url }))
 	return (
 		<nav
 			aria-label="Elsewhere"
 			data-quiet=""
 			className="flex flex-col gap-1 text-[13px] sm:items-end sm:text-right"
 		>
-			<span>
-				{orgs.map((org, i) => (
-					<span key={org.id}>
-						{i > 0 && <span className="text-muted"> · </span>}
-						<a href={org.url} target="_blank" rel="noopener noreferrer" className="link">
-							{org.label}
-						</a>
-					</span>
-				))}
-			</span>
-			<span>
-				{SOCIAL_LINKS.map((link, i) => (
-					<span key={link.label}>
-						{i > 0 && <span className="text-muted"> · </span>}
-						<a href={link.url} target="_blank" rel="noopener noreferrer" className="link">
-							{link.label}
-						</a>
-					</span>
-				))}
-			</span>
+			<LinkRow items={orgs} />
+			<LinkRow items={social} />
 		</nav>
 	)
 }

@@ -107,7 +107,6 @@ export type NetworkNode = {
 	id: string
 	label: string
 	role: string
-	tagline: string
 	parent: string | null
 	links: readonly { kind: NetworkLinkKind; url: string }[]
 }
@@ -117,7 +116,6 @@ export const NETWORK: readonly NetworkNode[] = [
 		id: "radonforge",
 		label: "Radon Forge",
 		role: "studio",
-		tagline: "Independent studio.",
 		parent: null,
 		links: [
 			{ kind: "web", url: "https://radonforge.com" },
@@ -128,7 +126,6 @@ export const NETWORK: readonly NetworkNode[] = [
 		id: "obliolabs",
 		label: "Oblio Labs",
 		role: "research",
-		tagline: "Measuring what models forget.",
 		parent: "radonforge",
 		links: [
 			{ kind: "web", url: "https://obliolabs.com" },

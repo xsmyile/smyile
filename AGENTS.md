@@ -4,7 +4,7 @@ Guidance for coding agents working in this repository.
 
 ## Project
 
-Personal site (https://smyile.com): minimal, monochrome SPA over a dithered tesseract, with projects, links and a terminal. Deployed to GitHub Pages on every `master` push.
+Personal site (https://smyile.com): minimal SPA over a 3D fall through a tesseract, with projects, links and a terminal. Deployed to GitHub Pages on every `master` push.
 
 ## Tech Stack
 
@@ -12,6 +12,7 @@ Personal site (https://smyile.com): minimal, monochrome SPA over a dithered tess
 - **Vite 8** (build tool)
 - **TanStack Router** (type-safe file-based routing, single index route)
 - **Tailwind CSS v4** + custom CSS theme variables (`src/styles.css`)
+- **three.js** (backdrop scene, loaded with a dynamic import so the page text never waits for it)
 - **Framer Motion** (fullscreen terminal transition)
 - **Biome** (linter + formatter — no eslint/prettier)
 
@@ -36,7 +37,7 @@ CI uses `bun install --frozen-lockfile` and `bun run build`.
 
 ## Architecture
 
-**Single-page app** with one route (`/`): a full-screen dithered tesseract behind four corners of text. Top left the name in Major Mono Display and the role, top right the one-line prompt, bottom left the projects (the first one featured), bottom right orgs and social links.
+**Single-page app** with one route (`/`): a full-screen three.js fall through an endless lattice of glass bars and glowing blocks, behind four corners of text. Top left the name in Major Mono Display and the role, top right the one-line prompt, bottom left the projects (the first one featured), bottom right orgs and social links.
 
 ```
 src/
@@ -46,7 +47,7 @@ src/
 ├── components/
 │   ├── home-page.tsx           # Page shell: backdrop, corners, fullscreen terminal, Sissy pet
 │   ├── home-sections.tsx       # Projects list and orgs/social links
-│   ├── tesseract-backdrop.tsx  # Canvas loop for the tesseract scene (pointer, click, reduced motion)
+│   ├── tesseract-backdrop.tsx  # Loads the scene, frame loop, wheel boost, pointer look, reduced motion
 │   ├── prompt-line.tsx         # One-line prompt: runs a command and opens the fullscreen terminal
 │   ├── terminal-fullscreen.tsx # Edge-to-edge TTY fullscreen terminal (Ctrl+K, /#terminal)
 │   ├── terminal-output.tsx     # Shared output line and prompt rendering
@@ -57,8 +58,9 @@ src/
 │   ├── use-terminal-session.ts # Shared terminal history, input and key handling
 │   └── use-uptime.ts           # Session uptime helper (getUptime)
 └── lib/
-    ├── tesseract-scene.ts      # Tesseract, corridor and strings rasterized to a dithered buffer
-    ├── dither.ts               # Bayer threshold, RGBA writes, CSS color tokens
+    ├── tesseract-world.ts      # three.js scene: recycled lattice chunks, shattering wall panels, twist shader, bloom and lens passes
+    ├── tunnel-timeline.ts      # Pure timeline: fall speed, palettes, twist envelope, streaks
+    ├── css-color.ts            # Reads a #rrggbb CSS token as 0..1 RGB
     ├── storage.ts              # tryStorage: Web Storage calls that degrade when storage is unavailable
     ├── url.ts                  # displayHost for showing URLs without scheme
     ├── motion.ts               # Shared prefers-reduced-motion query
@@ -75,9 +77,9 @@ src/
 
 **Caching:** localStorage with `smyile_{VERSION}_` prefix, 5-min TTL, stale fallback on API errors. Keys of other versions auto-purged on load; unversioned keys (`smyile_last_login`) persist across deploys.
 
-**Readability:** elements marked `data-quiet` are quiet zones: the backdrop fades to nothing under them, so text stays legible over the scene.
+**Readability:** text in `--ink` (near white) and `--muted`; the lens pass darkens the screen edges with a vignette so the corners stay legible over the scene. `--scene` tints the glass bars.
 
-**Responsive:** the corners stack on narrow screens; the backdrop uses 3px cells under 700px. Terminal command chips show only on touch (`pointer: coarse`).
+**Responsive:** the corners stack on narrow screens; the backdrop renders at a pixel ratio capped at 1.25. Terminal command chips show only on touch (`pointer: coarse`).
 
 ## Release Process
 

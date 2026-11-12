@@ -1,118 +1,108 @@
 import { useEffect, useRef } from "react"
-import { readCssColor } from "../lib/dither"
+import { readCssColor } from "../lib/css-color"
 import { REDUCED_MOTION_QUERY } from "../lib/motion"
-import {
-	advanceScene,
-	createScene,
-	kickScene,
-	type Point,
-	paintScene,
-	type QuietZone,
-	type Scene,
-	setQuietZones,
-	settleScene,
-} from "../lib/tesseract-scene"
+import type { TesseractWorld } from "../lib/tesseract-world"
+import { baseSpeed, fadeIn, paletteAt, streakFor, twistAt } from "../lib/tunnel-timeline"
 
-const FRAME_MS = 33
-const MAX_STEP_MS = 100
-const POINTER_EASE = 0.05
-const CELL_PX = 2
-const COARSE_CELL_PX = 3
-const COARSE_BREAKPOINT_PX = 700
-const MAX_CELLS = 360_000
-const INK_PROPERTY = "--ink"
-const INTERACTIVE = "a, button, input, label, [role='dialog']"
-const QUIET_SELECTOR = "[data-quiet]"
+const MAX_STEP_S = 0.1
+const POINTER_RATE_PER_S = 3
+const MIN_FRAME_MS = 15
+const WHEEL_GAIN = 0.03
+const MAX_BOOST = 28
+const BOOST_DECAY_PER_S = 1.4
+const BOOST_EASE_PER_S = 6
+const ROLL_FOLLOW = 0.6
+const STILL_TIME_S = 6
+const STILL_TRAVEL = 24
+const BEAM_COLOR_PROPERTY = "--scene"
+
+const WHEEL_LINE_PX = 16
+
+function wheelUnit(deltaMode: number): number {
+	if (deltaMode === WheelEvent.DOM_DELTA_LINE) return WHEEL_LINE_PX
+	if (deltaMode === WheelEvent.DOM_DELTA_PAGE) return window.innerHeight
+	return 1
+}
 
 type Props = {
 	paused: boolean
 }
 
-function cellSize(width: number, height: number): number {
-	const base = window.innerWidth < COARSE_BREAKPOINT_PX ? COARSE_CELL_PX : CELL_PX
-	return Math.max(base, Math.ceil(Math.sqrt((width * height) / MAX_CELLS)))
-}
-
-function quietZones(origin: DOMRect, cell: number): QuietZone[] {
-	return [...document.querySelectorAll(QUIET_SELECTOR)].map((el) => {
-		const r = el.getBoundingClientRect()
-		return {
-			left: (r.left - origin.left) / cell,
-			top: (r.top - origin.top) / cell,
-			right: (r.right - origin.left) / cell,
-			bottom: (r.bottom - origin.top) / cell,
-		}
-	})
-}
-
+/**
+ * The page backdrop: a three.js fall through the inside of a tesseract, loaded on demand.
+ * Scrolling the wheel speeds the fall up. Renders nothing when WebGL is unavailable.
+ */
 export function TesseractBackdrop({ paused }: Props) {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const pausedRef = useRef(paused)
-	pausedRef.current = paused
+
+	useEffect(() => {
+		pausedRef.current = paused
+	}, [paused])
 
 	useEffect(() => {
 		const canvas = canvasRef.current
-		const ctx = canvas?.getContext("2d")
-		if (!canvas || !ctx) return
-
+		if (!canvas) return
 		const reduced = window.matchMedia(REDUCED_MOTION_QUERY).matches
-		const ink = readCssColor(INK_PROPERTY)
-		const pointer: Point = { x: 0, y: 0 }
-		const target: Point = { x: 0, y: 0 }
-		let scene: Scene | null = null
-		let image: ImageData | null = null
+		const look = { x: 0, y: 0 }
+		const target = { x: 0, y: 0 }
+		let world: TesseractWorld | null = null
+		let cancelled = false
 		let raf = 0
 		let last = 0
-		let pendingRebuild = 0
+		let seconds = 0
+		let travel = 0
+		let roll = 0
+		let boost = 0
+		let boostTarget = 0
 
-		function paint() {
-			if (!scene || !image || !ctx) return
-			paintScene(scene, image.data, ink)
-			ctx.putImageData(image, 0, 0)
-		}
-
-		function rebuild() {
-			if (!canvas || !ctx) return
-			const rect = canvas.getBoundingClientRect()
-			const { width, height } = rect
-			const cell = cellSize(width, height)
-			const cols = Math.ceil(width / cell)
-			const rows = Math.ceil(height / cell)
-			if (cols < 2 || rows < 2) return
-			if (scene && scene.cols === cols && scene.rows === rows) {
-				setQuietZones(scene, quietZones(rect, cell))
-				if (reduced) paint()
-				return
-			}
-			const clock = scene?.clock ?? 0
-			canvas.width = cols
-			canvas.height = rows
-			scene = createScene(cols, rows, quietZones(rect, cell))
-			scene.clock = clock
-			image = ctx.createImageData(cols, rows)
-			if (reduced) settleScene(scene, pointer)
-			else advanceScene(scene, FRAME_MS, pointer)
-			paint()
-		}
-
-		function scheduleRebuild() {
-			if (pendingRebuild) return
-			pendingRebuild = requestAnimationFrame(() => {
-				pendingRebuild = 0
-				rebuild()
+		function drawStill() {
+			world?.render({
+				time: STILL_TIME_S,
+				travel: STILL_TRAVEL,
+				look,
+				roll: 0,
+				twist: 0,
+				palette: paletteAt(STILL_TIME_S),
+				fade: 1,
+				streak: 0,
 			})
+		}
+
+		function fit() {
+			if (!canvas || !world) return
+			const { width, height } = canvas.getBoundingClientRect()
+			if (width < 1 || height < 1) return
+			world.resize(width, height)
+			if (reduced) drawStill()
 		}
 
 		function frame(now: number) {
 			raf = requestAnimationFrame(frame)
-			if (pausedRef.current || !scene) return
-			const elapsed = last ? now - last : FRAME_MS
-			if (elapsed < FRAME_MS) return
+			if (last && now - last < MIN_FRAME_MS) return
+			const elapsed = last ? Math.min((now - last) / 1000, MAX_STEP_S) : 0
 			last = now
-			pointer.x += (target.x - pointer.x) * POINTER_EASE
-			pointer.y += (target.y - pointer.y) * POINTER_EASE
-			advanceScene(scene, Math.min(elapsed, MAX_STEP_MS), pointer)
-			paint()
+			if (pausedRef.current || !world) return
+			seconds += elapsed
+			boostTarget *= Math.exp(-BOOST_DECAY_PER_S * elapsed)
+			boost += (boostTarget - boost) * Math.min(1, BOOST_EASE_PER_S * elapsed)
+			const speed = baseSpeed(seconds) + boost
+			const twist = twistAt(seconds)
+			travel += speed * elapsed
+			roll += twist * speed * ROLL_FOLLOW * elapsed
+			const ease = 1 - Math.exp(-POINTER_RATE_PER_S * elapsed)
+			look.x += (target.x - look.x) * ease
+			look.y += (target.y - look.y) * ease
+			world.render({
+				time: seconds,
+				travel,
+				look,
+				roll,
+				twist,
+				palette: paletteAt(seconds),
+				fade: fadeIn(seconds),
+				streak: streakFor(speed),
+			})
 		}
 
 		function handleMove(e: PointerEvent) {
@@ -126,35 +116,43 @@ export function TesseractBackdrop({ paused }: Props) {
 			target.y = 0
 		}
 
-		function handleDown(e: PointerEvent) {
-			if (e.pointerType !== "mouse" || pausedRef.current || !scene) return
-			if (e.target instanceof Element && e.target.closest(INTERACTIVE)) return
-			kickScene(scene)
+		function handleWheel(e: WheelEvent) {
+			if (pausedRef.current) return
+			const pixels = Math.abs(e.deltaY) * wheelUnit(e.deltaMode)
+			boostTarget = Math.min(MAX_BOOST, boostTarget + pixels * WHEEL_GAIN)
 		}
 
-		const observer = new ResizeObserver(scheduleRebuild)
-		observer.observe(canvas)
-		for (const el of document.querySelectorAll(QUIET_SELECTOR)) observer.observe(el)
-		rebuild()
-		if (!reduced) {
-			raf = requestAnimationFrame(frame)
-			window.addEventListener("pointermove", handleMove)
-			document.documentElement.addEventListener("pointerleave", handleLeave)
-			window.addEventListener("pointerdown", handleDown)
-		}
+		const observer = new ResizeObserver(fit)
+		import("../lib/tesseract-world")
+			.then(({ createTesseractWorld }) => {
+				if (cancelled) return
+				world = createTesseractWorld(canvas, readCssColor(BEAM_COLOR_PROPERTY))
+				observer.observe(canvas)
+				fit()
+				if (reduced) return
+				raf = requestAnimationFrame(frame)
+				window.addEventListener("pointermove", handleMove)
+				document.documentElement.addEventListener("pointerleave", handleLeave)
+				window.addEventListener("wheel", handleWheel, { passive: true })
+			})
+			.catch((error: unknown) => {
+				console.warn("Backdrop: the 3D scene could not start, showing a plain background", error)
+			})
+
 		return () => {
+			cancelled = true
 			cancelAnimationFrame(raf)
-			cancelAnimationFrame(pendingRebuild)
 			observer.disconnect()
 			window.removeEventListener("pointermove", handleMove)
 			document.documentElement.removeEventListener("pointerleave", handleLeave)
-			window.removeEventListener("pointerdown", handleDown)
+			window.removeEventListener("wheel", handleWheel)
+			world?.dispose()
 		}
 	}, [])
 
 	return (
-		<div aria-hidden="true" className="pointer-events-none absolute inset-0">
-			<canvas ref={canvasRef} className="block size-full [image-rendering:pixelated]" />
+		<div aria-hidden="true" className="pointer-events-none fixed inset-0">
+			<canvas ref={canvasRef} className="block size-full" />
 		</div>
 	)
 }

@@ -43,7 +43,6 @@ export function ProjectList() {
 	return (
 		<section
 			aria-label="Projects"
-			data-quiet=""
 			className="flex w-full max-w-[400px] flex-col gap-3.5 text-[13px]"
 		>
 			<article className="flex flex-col gap-0.5 border-b border-line pb-3">
@@ -79,7 +78,6 @@ export function Elsewhere() {
 	return (
 		<nav
 			aria-label="Elsewhere"
-			data-quiet=""
 			className="flex flex-col gap-1 text-[13px] sm:items-end sm:text-right"
 		>
 			<LinkRow items={orgs} />

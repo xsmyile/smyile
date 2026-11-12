@@ -4,10 +4,11 @@
 	--ground: #050505;
 	--line: #2a2926;
 	--line-strong: #3a3935;
-	--ink: #e9e7e2;
+	--ink: #f5f3ee;
+	--scene: #a29e95;
 	--soft: #c4c1ba;
-	--muted: #9a978f;
-	--faint: #7d7a73;
+	--muted: #b6b3ab;
+	--faint: #8e8b84;
 	--alert: #e5806e;
 }
 
@@ -36,6 +37,7 @@
 		font-family: var(--font-mono);
 		cursor: default;
 		user-select: none;
+		overscroll-behavior: none;
 	}
 
 	::-webkit-scrollbar {

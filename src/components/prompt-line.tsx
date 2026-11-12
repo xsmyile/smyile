@@ -54,7 +54,7 @@ export function PromptLine({ session, openRef, sissyOut, onOpen }: Props) {
 					onKeyDown={session.handleKeyDown}
 					maxLength={INPUT_MAX_LENGTH}
 					placeholder="help"
-					className="min-w-0 flex-1 bg-transparent text-base text-ink caret-ink outline-none placeholder:text-faint sm:text-sm"
+					className="min-w-0 flex-1 bg-transparent text-sm text-ink caret-ink outline-none placeholder:text-faint pointer-coarse:text-base"
 					spellCheck={false}
 					autoComplete="off"
 					autoCapitalize="none"

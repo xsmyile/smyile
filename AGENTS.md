@@ -47,7 +47,7 @@ src/
 ├── components/
 │   ├── home-page.tsx           # Page shell: backdrop, corners, fullscreen terminal, Sissy pet
 │   ├── home-sections.tsx       # Projects list and orgs/social links
-│   ├── tesseract-backdrop.tsx  # Loads the scene, frame loop, wheel boost, pointer look, reduced motion
+│   ├── tesseract-backdrop.tsx  # Loads the scene, frame loop, wheel and swipe boost, hold to slow time, pointer look, reduced motion
 │   ├── prompt-line.tsx         # One-line prompt: runs a command and opens the fullscreen terminal
 │   ├── terminal-fullscreen.tsx # Edge-to-edge TTY fullscreen terminal (Ctrl+K, /#terminal)
 │   ├── terminal-output.tsx     # Shared output line and prompt rendering

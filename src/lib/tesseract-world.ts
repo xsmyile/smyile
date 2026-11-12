@@ -4,6 +4,7 @@ import {
 	type BufferGeometry,
 	Color,
 	FogExp2,
+	InstancedBufferAttribute,
 	InstancedMesh,
 	type Material,
 	MeshBasicMaterial,
@@ -56,6 +57,18 @@ const CHUNKS = 3
 const START_Z = 1
 const RECYCLE_MARGIN = 2
 const BEAM_WIDTH = 0.07
+const WALL_BEAM_SCALE = 2.4
+const CORNER_SHARE = 0.35
+const CORNER_BRIGHT_SHARE = 0.32
+const PANEL_RINGS = [
+	{ half: CELL, perCell: 6 },
+	{ half: CELL * 2, perCell: 4 },
+] as const
+const PANEL_THICKNESS = 0.012
+const PANEL_OPACITY = 0.35
+const PANEL_SHADE = 0.1
+const PANEL_GLOW = 0.025
+const PANEL_SEED = 97
 const BLOCKS_PER_CHUNK = 1100
 const NEAR_WALL = CELL * 2
 const NEAR_WALL_SHARE = 0.75
@@ -71,7 +84,7 @@ const SWAY_X = 0.25
 const SWAY_Y = 0.2
 const LOOK_PITCH = 0.12
 const LOOK_YAW = 0.18
-const BLOOM_STRENGTH = 0.85
+const BLOOM_STRENGTH = 0.75
 const BLOOM_RADIUS = 0.4
 const BLOOM_THRESHOLD = 0.85
 const ENV_BLUR = 0.04
@@ -96,12 +109,14 @@ transformedNormal.xy = vec2(
 #include <normal_vertex>
 `
 
-const TWISTED_PROJECT = /* glsl */ `
+function twistedProject(offset: string): string {
+	return /* glsl */ `
 vec4 twistedWorld = vec4( transformed, 1.0 );
 #ifdef USE_INSTANCING
 	twistedWorld = instanceMatrix * twistedWorld;
 #endif
 twistedWorld = modelMatrix * twistedWorld;
+twistedWorld.xyz += ${offset};
 float twistAngle = ( twistedWorld.z - cameraPosition.z ) * uTwist;
 float twistCos = cos( twistAngle );
 float twistSin = sin( twistAngle );
@@ -112,6 +127,21 @@ twistedWorld.xy = vec2(
 vec4 mvPosition = viewMatrix * twistedWorld;
 gl_Position = projectionMatrix * mvPosition;
 `
+}
+
+const PANEL_DECLARATIONS =
+	"attribute float aSeed;\nattribute vec3 aWallNormal;\nuniform float uTime;"
+
+const PANEL_SHATTER = /* glsl */ `
+#include <begin_vertex>
+vec4 panelCenter = modelMatrix * instanceMatrix * vec4( 0.0, 0.0, 0.0, 1.0 );
+float panelPhase = fract( uTime * 0.12 + aSeed + panelCenter.z * 0.031 );
+float shatter = smoothstep( 0.62, 0.74, panelPhase ) * ( 1.0 - smoothstep( 0.8, 0.97, panelPhase ) );
+transformed *= 1.0 - shatter * 0.65;
+`
+
+const PANEL_OFFSET =
+	"aWallNormal * shatter * 0.9 + vec3( sin( aSeed * 41.0 ), cos( aSeed * 37.0 ), sin( aSeed * 23.0 ) ) * shatter * 0.35"
 
 const BLOCK_UNIFORMS = "uniform float uTime;\nuniform vec3 uColorA;\nuniform vec3 uColorB;"
 
@@ -225,12 +255,28 @@ function chunkSegments(): Segment[] {
 	return segments
 }
 
-function injectTwist(shader: WebGLProgramParametersWithUniforms, twist: { value: number }) {
+function injectTwist(
+	shader: WebGLProgramParametersWithUniforms,
+	twist: { value: number },
+	offset = "vec3( 0.0 )",
+) {
 	shader.uniforms.uTwist = twist
 	shader.vertexShader = shader.vertexShader
 		.replace("void main() {", `${TWIST_UNIFORM}\nvoid main() {`)
 		.replace("#include <normal_vertex>", TWISTED_NORMAL)
-		.replace("#include <project_vertex>", TWISTED_PROJECT)
+		.replace("#include <project_vertex>", twistedProject(offset))
+}
+
+function ringOf(s: { x: number; y: number }): number {
+	return Math.max(Math.abs(s.x), Math.abs(s.y))
+}
+
+function isCorner(s: Segment): boolean {
+	const ax = Math.abs(s.x)
+	const ay = Math.abs(s.y)
+	if (s.axis === 2) return ax === CELL && ay === CELL
+	if (s.axis === 0) return ax === CELL / 2 && ay === CELL
+	return ay === CELL / 2 && ax === CELL
 }
 
 function buildBeams(
@@ -243,6 +289,8 @@ function buildBeams(
 	segments.forEach((s, i) => {
 		dummy.position.set(s.x, s.y, s.z)
 		dummy.rotation.set(s.axis === 1 ? Math.PI / 2 : 0, s.axis === 0 ? Math.PI / 2 : 0, 0)
+		const thickness = ringOf(s) <= CELL ? WALL_BEAM_SCALE : 1
+		dummy.scale.set(thickness, thickness, 1)
 		dummy.updateMatrix()
 		mesh.setMatrixAt(i, dummy.matrix)
 	})
@@ -258,12 +306,15 @@ function buildBlocks(
 	seed: number,
 ): InstancedMesh {
 	const random = mulberry32(seed)
-	const nearWall = segments.filter((s) => Math.max(Math.abs(s.x), Math.abs(s.y)) <= NEAR_WALL)
+	const nearWall = segments.filter((s) => ringOf(s) <= NEAR_WALL)
+	const corners = segments.filter(isCorner)
 	const mesh = new InstancedMesh(geometry, material, BLOCKS_PER_CHUNK)
 	const dummy = new Object3D()
 	const color = new Color()
 	for (let i = 0; i < BLOCKS_PER_CHUNK; i++) {
-		const pool = random() < NEAR_WALL_SHARE ? nearWall : segments
+		const pick = random()
+		const pool = pick < CORNER_SHARE ? corners : pick < NEAR_WALL_SHARE ? nearWall : segments
+		const brightShare = pool === corners ? CORNER_BRIGHT_SHARE : BRIGHT_SHARE
 		const s = pool[Math.floor(random() * pool.length)]
 		const along =
 			random() < NODE_BIAS ? (random() < 0.5 ? random() * 0.2 : 0.8 + random() * 0.2) : random()
@@ -285,11 +336,67 @@ function buildBlocks(
 		}
 		dummy.updateMatrix()
 		mesh.setMatrixAt(i, dummy.matrix)
-		const light = random() < BRIGHT_SHARE ? 1.6 + random() * 2.4 : 0.02 + random() * 0.1
+		const light = random() < brightShare ? 1.6 + random() * 2.4 : 0.02 + random() * 0.1
 		mesh.setColorAt(i, color.setRGB(random(), light, random()))
 	}
 	mesh.instanceMatrix.needsUpdate = true
 	if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+	mesh.frustumCulled = false
+	return mesh
+}
+
+/**
+ * Glass panels lining the shaft walls and the next ring out. Each carries a seed and its wall's
+ * outward normal, which the vertex shader uses to shatter it away from the wall and pull it back.
+ */
+function buildPanels(material: Material): InstancedMesh {
+	const random = mulberry32(PANEL_SEED)
+	const dummy = new Object3D()
+	const matrices: number[][] = []
+	const seeds: number[] = []
+	const normals: number[] = []
+	const walls = [
+		[1, 0],
+		[-1, 0],
+		[0, 1],
+		[0, -1],
+	] as const
+	for (const ring of PANEL_RINGS) {
+		for (let layer = 0; layer < CHUNK_CELLS; layer++) {
+			const zc = -layer * CELL - CELL / 2
+			for (const [nx, ny] of walls) {
+				for (let u = -ring.half + CELL / 2; u < ring.half; u += CELL) {
+					for (let n = 0; n < ring.perCell; n++) {
+						const w = 0.15 + random() * 0.8
+						const d = 0.08 + random() * 0.5
+						const along = u + (random() - 0.5) * (CELL - w)
+						const z = zc + (random() - 0.5) * (CELL - d)
+						const depth = (random() - 0.5) * 0.1
+						if (nx !== 0) {
+							dummy.position.set(nx * ring.half + depth, along, z)
+							dummy.scale.set(PANEL_THICKNESS, w, d)
+						} else {
+							dummy.position.set(along, ny * ring.half + depth, z)
+							dummy.scale.set(w, PANEL_THICKNESS, d)
+						}
+						dummy.updateMatrix()
+						matrices.push(dummy.matrix.toArray())
+						seeds.push(random())
+						normals.push(nx, ny, 0)
+					}
+				}
+			}
+		}
+	}
+	const geometry = new BoxGeometry(1, 1, 1)
+	geometry.setAttribute("aSeed", new InstancedBufferAttribute(new Float32Array(seeds), 1))
+	geometry.setAttribute("aWallNormal", new InstancedBufferAttribute(new Float32Array(normals), 3))
+	const mesh = new InstancedMesh(geometry, material, matrices.length)
+	matrices.forEach((m, i) => {
+		dummy.matrix.fromArray(m)
+		mesh.setMatrixAt(i, dummy.matrix)
+	})
+	mesh.instanceMatrix.needsUpdate = true
 	mesh.frustumCulled = false
 	return mesh
 }
@@ -342,12 +449,23 @@ function buildWorld(renderer: WebGLRenderer, beamColor: Rgb): TesseractWorld {
 		clearcoatRoughness: 0.04,
 		iridescence: 0.9,
 		iridescenceIOR: 1.5,
-		envMapIntensity: 0.4,
+		envMapIntensity: 0.16,
 		transparent: true,
 		opacity: 0.4,
 		depthWrite: false,
 	})
 	glass.onBeforeCompile = (shader) => injectTwist(shader, twist)
+
+	const panelGlass = glass.clone()
+	panelGlass.opacity = PANEL_OPACITY
+	panelGlass.color.multiplyScalar(PANEL_SHADE / GLASS_SHADE)
+	panelGlass.onBeforeCompile = (shader) => {
+		injectTwist(shader, twist, PANEL_OFFSET)
+		shader.uniforms.uTime = blockUniforms.uTime
+		shader.vertexShader = shader.vertexShader
+			.replace("void main() {", `${PANEL_DECLARATIONS}\nvoid main() {`)
+			.replace("#include <begin_vertex>", PANEL_SHATTER)
+	}
 
 	const glow = new MeshBasicMaterial({ color: 0xffffff, toneMapped: false })
 	glow.onBeforeCompile = (shader) => {
@@ -364,11 +482,12 @@ function buildWorld(renderer: WebGLRenderer, beamColor: Rgb): TesseractWorld {
 	const chunks = Array.from({ length: CHUNKS }, (_, k) => {
 		const beams = buildBeams(segments, beamGeometry, glass)
 		const blocks = buildBlocks(segments, blockGeometry, glow, k + 1)
+		const panels = buildPanels(panelGlass)
 		const group = new Object3D()
-		group.add(beams, blocks)
+		group.add(beams, blocks, panels)
 		group.position.z = START_Z - k * CHUNK_DEPTH
 		scene.add(group)
-		return { group, beams, blocks }
+		return { group, beams, blocks, panels }
 	})
 
 	const composer = new EffectComposer(renderer)
@@ -402,6 +521,7 @@ function buildWorld(renderer: WebGLRenderer, beamColor: Rgb): TesseractWorld {
 			blockUniforms.uTime.value = time
 			blockUniforms.uColorA.value.setRGB(palette[0][0], palette[0][1], palette[0][2])
 			blockUniforms.uColorB.value.setRGB(palette[1][0], palette[1][1], palette[1][2])
+			panelGlass.emissive.copy(blockUniforms.uColorA.value).multiplyScalar(PANEL_GLOW)
 			lens.uniforms.uTime.value = time
 			lens.uniforms.uFade.value = fade
 			lens.uniforms.uStreak.value = streak
@@ -421,7 +541,10 @@ function buildWorld(renderer: WebGLRenderer, beamColor: Rgb): TesseractWorld {
 			for (const chunk of chunks) {
 				chunk.beams.dispose()
 				chunk.blocks.dispose()
+				chunk.panels.geometry.dispose()
+				chunk.panels.dispose()
 			}
+			panelGlass.dispose()
 			beamGeometry.dispose()
 			blockGeometry.dispose()
 			glass.dispose()

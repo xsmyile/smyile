@@ -58,7 +58,7 @@ src/
 │   ├── use-terminal-session.ts # Shared terminal history, input and key handling
 │   └── use-uptime.ts           # Session uptime helper (getUptime)
 └── lib/
-    ├── tesseract-world.ts      # three.js scene: recycled lattice chunks, twist shader, bloom and lens passes
+    ├── tesseract-world.ts      # three.js scene: recycled lattice chunks, shattering wall panels, twist shader, bloom and lens passes
     ├── tunnel-timeline.ts      # Pure timeline: fall speed, palettes, twist envelope, streaks
     ├── css-color.ts            # Reads a #rrggbb CSS token as 0..1 RGB
     ├── storage.ts              # tryStorage: Web Storage calls that degrade when storage is unavailable

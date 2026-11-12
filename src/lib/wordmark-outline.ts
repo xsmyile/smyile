@@ -1,5 +1,4 @@
-import type { Rgb } from "./dither"
-import { writePixel } from "./dither"
+import { bayerThreshold, type Rgb, writePixel } from "./dither"
 
 /** Distance of every inside cell from the glyph outline, in cells; 0 outside the glyphs. */
 export type DistanceField = {
@@ -12,9 +11,9 @@ const INSIDE_ALPHA = 110
 const UNSET = Number.POSITIVE_INFINITY
 const STRAIGHT = 1
 const DIAGONAL = Math.SQRT2
-const CONTOUR_PERIOD = 4.2
-const CONTOUR_WIDTH = 1.2
 const OUTLINE_WIDTH = 1.5
+const REST_LIGHT = 0.5
+const SWEEP_WIDTH = 0.012
 
 /** Two-pass chamfer distance transform of the alpha channel of RGBA `pixels`. */
 export function distanceField(
@@ -54,19 +53,23 @@ export function distanceField(
 }
 
 /**
- * Paints the glyphs as their outline plus concentric inner contours; `flow` (in cells) shifts the
- * contours inward as it grows.
+ * Paints the glyph outline, dithered: dim at rest, full where a soft band of light passes.
+ * `sweep` is the band center as a fraction of the width; values outside 0..1 leave it at rest.
  */
-export function paintContours(
+export function paintOutline(
 	field: DistanceField,
 	pixels: Uint8ClampedArray,
 	ink: Rgb,
-	flow: number,
+	sweep: number,
 ) {
-	const shift = CONTOUR_PERIOD - (flow % CONTOUR_PERIOD)
-	for (let i = 0; i < field.distance.length; i++) {
-		const d = field.distance[i]
-		const on = d > 0 && (d < OUTLINE_WIDTH || (d + shift) % CONTOUR_PERIOD < CONTOUR_WIDTH)
-		writePixel(pixels, i, ink, on)
+	const { cols, rows, distance } = field
+	for (let y = 0; y < rows; y++) {
+		for (let x = 0; x < cols; x++) {
+			const i = y * cols + x
+			const d = distance[i]
+			const dx = x / cols - sweep
+			const light = REST_LIGHT + (1 - REST_LIGHT) * Math.exp(-(dx * dx) / SWEEP_WIDTH)
+			writePixel(pixels, i, ink, d > 0 && d < OUTLINE_WIDTH && light > bayerThreshold(x, y))
+		}
 	}
 }

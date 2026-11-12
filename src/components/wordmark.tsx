@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"
-import { type DistanceField, distanceField, paintContours } from "../lib/contour-wordmark"
 import { readCssColor } from "../lib/dither"
+import { type DistanceField, distanceField, paintOutline } from "../lib/wordmark-outline"
 
 const WORD_FONT_FAMILY = "Unbounded"
 const WORD_FONT_WEIGHT = 800
@@ -9,8 +9,10 @@ const FONT_TIMEOUT_MS = 1500
 const CELL_PX = 2
 const FRAME_MS = 33
 const MAX_STEP_MS = 100
-const FLOW_PER_MS = 0.00088
-const STILL_FLOW = 1
+const SWEEP_CYCLE_MS = 7000
+const SWEEP_SPAN = 2
+const SWEEP_START = -0.3
+const STILL_SWEEP = -1
 const INK_PROPERTY = "--ink"
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)"
 
@@ -55,7 +57,7 @@ function rasterize(text: string, cols: number, rows: number): DistanceField | nu
 	return distanceField(g.getImageData(0, 0, cols, rows).data, cols, rows)
 }
 
-/** The name drawn as dithered concentric contours that flow inward. */
+/** The name drawn as a dithered outline that a slow band of light crosses. */
 export function Wordmark({ text, paused }: Props) {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const pausedRef = useRef(paused)
@@ -72,12 +74,13 @@ export function Wordmark({ text, paused }: Props) {
 		let image: ImageData | null = null
 		let raf = 0
 		let last = 0
-		let flow = STILL_FLOW
+		let sweep = STILL_SWEEP
+		let elapsedTotal = 0
 		let cancelled = false
 
 		function paint() {
 			if (!field || !image || !ctx) return
-			paintContours(field, image.data, ink, flow)
+			paintOutline(field, image.data, ink, sweep)
 			ctx.putImageData(image, 0, 0)
 		}
 
@@ -101,7 +104,8 @@ export function Wordmark({ text, paused }: Props) {
 			const elapsed = last ? now - last : FRAME_MS
 			if (elapsed < FRAME_MS) return
 			last = now
-			flow += Math.min(elapsed, MAX_STEP_MS) * FLOW_PER_MS
+			elapsedTotal = (elapsedTotal + Math.min(elapsed, MAX_STEP_MS)) % SWEEP_CYCLE_MS
+			sweep = SWEEP_START + (elapsedTotal / SWEEP_CYCLE_MS) * SWEEP_SPAN
 			paint()
 		}
 
@@ -127,7 +131,7 @@ export function Wordmark({ text, paused }: Props) {
 			ref={canvasRef}
 			role="img"
 			aria-label={text}
-			className="block aspect-[4.2/1] w-[clamp(200px,28vw,440px)] [image-rendering:pixelated]"
+			className="block aspect-[4.2/1] w-[clamp(150px,16vw,250px)] [image-rendering:pixelated]"
 		/>
 	)
 }

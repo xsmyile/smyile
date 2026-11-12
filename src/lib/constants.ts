@@ -32,7 +32,7 @@ export const PROJECTS: readonly Project[] = [
 	},
 	{
 		id: "overbot",
-		name: "Overbot",
+		name: "OverBot",
 		status: "live",
 		stack: "Discord",
 		url: "https://overbot.net",

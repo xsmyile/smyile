@@ -36,7 +36,7 @@ CI uses `bun install --frozen-lockfile` and `bun run build`.
 
 ## Architecture
 
-**Single-page app** with one route (`/`): a full-screen dithered tesseract behind four corners of text. Top left the outline wordmark and the role, top right the one-line prompt, bottom left the projects (the first one featured), bottom right orgs and social links.
+**Single-page app** with one route (`/`): a full-screen dithered tesseract behind four corners of text. Top left the name in Major Mono Display and the role, top right the one-line prompt, bottom left the projects (the first one featured), bottom right orgs and social links.
 
 ```
 src/
@@ -47,7 +47,6 @@ src/
 │   ├── home-page.tsx           # Page shell: backdrop, corners, fullscreen terminal, Sissy pet
 │   ├── home-sections.tsx       # Projects list and orgs/social links
 │   ├── tesseract-backdrop.tsx  # Canvas loop for the tesseract scene (pointer, click, reduced motion)
-│   ├── wordmark.tsx            # "Smyile" as a dithered outline on an Unbounded 800 mask
 │   ├── prompt-line.tsx         # One-line prompt: runs a command and opens the fullscreen terminal
 │   ├── terminal-fullscreen.tsx # Edge-to-edge TTY fullscreen terminal (Ctrl+K, /#terminal)
 │   ├── terminal-output.tsx     # Shared output line and prompt rendering
@@ -59,7 +58,6 @@ src/
 │   └── use-uptime.ts           # Session uptime helper (getUptime)
 └── lib/
     ├── tesseract-scene.ts      # Tesseract, corridor and strings rasterized to a dithered buffer
-    ├── wordmark-outline.ts     # Distance field and light-swept outline for the wordmark
     ├── dither.ts               # Bayer threshold, RGBA writes, CSS color tokens
     ├── github-api.ts           # GitHub REST client with localStorage caching (5-min TTL)
     ├── terminal-commands.ts    # CLI command handlers and Tab completion

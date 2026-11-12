@@ -7,7 +7,6 @@ import { PromptLine } from "./prompt-line"
 import { type PetOrigin, SissyPet } from "./sissy-pet"
 import { TerminalFullscreen } from "./terminal-fullscreen"
 import { TesseractBackdrop } from "./tesseract-backdrop"
-import { Wordmark } from "./wordmark"
 
 const PET_OFFSET_X_PX = 56
 const PET_OFFSET_Y_PX = 92
@@ -38,8 +37,8 @@ export function HomePage() {
 			<main className="halo relative flex min-h-svh flex-col justify-between gap-[30vh] p-[clamp(20px,4vw,56px)] text-sm leading-relaxed">
 				<div className="flex flex-wrap items-start justify-between gap-6">
 					<header data-quiet="">
-						<h1>
-							<Wordmark text={IDENTITY.name} paused={fullscreen} />
+						<h1 className="font-display text-[clamp(30px,3vw,42px)] leading-none">
+							{IDENTITY.name}
 						</h1>
 						<p className="mt-3.5 text-muted">{IDENTITY.role}</p>
 					</header>

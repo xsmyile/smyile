@@ -22,6 +22,7 @@ const HOLD_TOUCH_MS = 250
 const SWIPE_SLOP_PX = 8
 const TOUCH_GAIN = 0.06
 const RELEASE_KICK = 7
+const TOUCH_LOOK_GAIN = 2
 const HOLD_EXEMPT = "a, button, input, .sissy-cat"
 const BEAM_COLOR_PROPERTY = "--scene"
 
@@ -33,6 +34,11 @@ function wheelUnit(deltaMode: number): number {
 	return 1
 }
 
+/** Look offset for a finger dragged across a share of the screen: the view follows the drag. */
+function dragLook(deltaPx: number, sizePx: number): number {
+	return Math.max(-1, Math.min(1, (deltaPx / sizePx) * TOUCH_LOOK_GAIN))
+}
+
 type Props = {
 	paused: boolean
 }
@@ -40,7 +46,8 @@ type Props = {
 /**
  * The page backdrop: a three.js fall through the inside of a tesseract, loaded on demand.
  * Scrolling the wheel or swiping speeds the fall up; holding the mouse button or a finger still
- * slows time until release. Renders nothing when WebGL is unavailable.
+ * slows time until release, and dragging a finger turns the view. Renders nothing when WebGL is
+ * unavailable.
  */
 export function TesseractBackdrop({ paused }: Props) {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -188,8 +195,11 @@ export function TesseractBackdrop({ paused }: Props) {
 		}
 
 		function handleTouchMove(e: TouchEvent) {
-			if (e.touches.length !== 1 || holding || pausedRef.current) return
+			if (e.touches.length !== 1 || pausedRef.current) return
 			const { clientX, clientY } = e.touches[0]
+			target.x = dragLook(touch.startX - clientX, window.innerWidth)
+			target.y = dragLook(touch.startY - clientY, window.innerHeight)
+			if (holding) return
 			if (!swiping) {
 				if (Math.hypot(clientX - touch.startX, clientY - touch.startY) < SWIPE_SLOP_PX) return
 				swiping = true
@@ -198,6 +208,11 @@ export function TesseractBackdrop({ paused }: Props) {
 			addBoost(Math.hypot(clientX - touch.x, clientY - touch.y) * TOUCH_GAIN)
 			touch.x = clientX
 			touch.y = clientY
+		}
+
+		function handleTouchEnd() {
+			release()
+			handleLeave()
 		}
 
 		function handleHidden() {
@@ -221,8 +236,8 @@ export function TesseractBackdrop({ paused }: Props) {
 				window.addEventListener("pointercancel", handleUp)
 				window.addEventListener("touchstart", handleTouchStart, { passive: true })
 				window.addEventListener("touchmove", handleTouchMove, { passive: true })
-				window.addEventListener("touchend", release)
-				window.addEventListener("touchcancel", release)
+				window.addEventListener("touchend", handleTouchEnd)
+				window.addEventListener("touchcancel", handleTouchEnd)
 				window.addEventListener("blur", release)
 				document.addEventListener("visibilitychange", handleHidden)
 			})
@@ -242,8 +257,8 @@ export function TesseractBackdrop({ paused }: Props) {
 			window.removeEventListener("pointercancel", handleUp)
 			window.removeEventListener("touchstart", handleTouchStart)
 			window.removeEventListener("touchmove", handleTouchMove)
-			window.removeEventListener("touchend", release)
-			window.removeEventListener("touchcancel", release)
+			window.removeEventListener("touchend", handleTouchEnd)
+			window.removeEventListener("touchcancel", handleTouchEnd)
 			window.removeEventListener("blur", release)
 			document.removeEventListener("visibilitychange", handleHidden)
 			clearTimeout(holdTimer)

@@ -6,6 +6,8 @@ import { Prompt } from "./terminal-output"
 const INPUT_ID = "prompt-line"
 const INPUT_MAX_LENGTH = 200
 const TOUCH_COMMANDS = ["help", "ls projects", "neofetch"] as const
+const EXIT_COMMANDS: ReadonlySet<string> = new Set(["/exit"])
+const IN_PLACE_COMMANDS: ReadonlySet<string> = new Set(["clear", "/clear", "sissy", "/sissy"])
 
 type Props = {
 	session: TerminalSession
@@ -19,8 +21,13 @@ export function PromptLine({ session, openRef, onOpen }: Props) {
 	const formRef = useRef<HTMLFormElement>(null)
 
 	function run(command: string) {
+		const name = command.trim().split(/\s+/)[0] ?? ""
+		if (EXIT_COMMANDS.has(name)) {
+			session.setInput("")
+			return
+		}
 		session.run(command, { anchor: formRef.current })
-		onOpen()
+		if (!IN_PLACE_COMMANDS.has(name)) onOpen()
 	}
 
 	return (

@@ -8,6 +8,7 @@ const PROBE_FONT_PX = 100
 const FONT_TIMEOUT_MS = 1500
 const CELL_PX = 2
 const FRAME_MS = 33
+const MAX_STEP_MS = 100
 const FLOW_PER_MS = 0.00088
 const STILL_FLOW = 1
 const INK_PROPERTY = "--ink"
@@ -100,7 +101,7 @@ export function Wordmark({ text, paused }: Props) {
 			const elapsed = last ? now - last : FRAME_MS
 			if (elapsed < FRAME_MS) return
 			last = now
-			flow += elapsed * FLOW_PER_MS
+			flow += Math.min(elapsed, MAX_STEP_MS) * FLOW_PER_MS
 			paint()
 		}
 

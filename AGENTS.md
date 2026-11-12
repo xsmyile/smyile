@@ -56,7 +56,7 @@ src/
 ├── hooks/
 │   ├── use-github.ts           # Profile, events (owner-filtered), star totals
 │   ├── use-terminal-session.ts # Shared terminal history, input and key handling
-│   └── use-uptime.ts           # Session timer
+│   └── use-uptime.ts           # Session uptime helper (getUptime)
 └── lib/
     ├── tesseract-scene.ts      # Tesseract, corridor and strings rasterized to a dithered buffer
     ├── contour-wordmark.ts     # Distance field and flowing contours for the wordmark

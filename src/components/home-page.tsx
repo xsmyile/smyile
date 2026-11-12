@@ -11,6 +11,8 @@ import { Wordmark } from "./wordmark"
 
 const PET_OFFSET_X_PX = 56
 const PET_OFFSET_Y_PX = 92
+const PET_GAP_PX = 12
+const EDGE_MARGIN_PX = 8
 
 export function HomePage() {
 	const github = useGitHub()
@@ -22,8 +24,11 @@ export function HomePage() {
 		totalStars: github.totalStars,
 		events: github.events,
 		sissyOut: petOrigin !== null,
-		onSummonSissy: (anchor) =>
-			setPetOrigin({ x: anchor.right - PET_OFFSET_X_PX, y: anchor.top - PET_OFFSET_Y_PX }),
+		onSummonSissy: (anchor) => {
+			const above = anchor.top - PET_OFFSET_Y_PX
+			const y = above >= EDGE_MARGIN_PX ? above : anchor.bottom + PET_GAP_PX
+			setPetOrigin({ x: anchor.right - PET_OFFSET_X_PX, y })
+		},
 	})
 
 	return (

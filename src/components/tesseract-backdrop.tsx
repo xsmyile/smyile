@@ -18,6 +18,7 @@ const POINTER_EASE = 0.05
 const CELL_PX = 2
 const COARSE_CELL_PX = 3
 const COARSE_BREAKPOINT_PX = 700
+const MAX_CELLS = 360_000
 const INK_PROPERTY = "--ink"
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)"
 const INTERACTIVE = "a, button, input, label, [role='dialog']"
@@ -27,8 +28,9 @@ type Props = {
 	paused: boolean
 }
 
-function cellSize(): number {
-	return window.innerWidth < COARSE_BREAKPOINT_PX ? COARSE_CELL_PX : CELL_PX
+function cellSize(width: number, height: number): number {
+	const base = window.innerWidth < COARSE_BREAKPOINT_PX ? COARSE_CELL_PX : CELL_PX
+	return Math.max(base, Math.ceil(Math.sqrt((width * height) / MAX_CELLS)))
 }
 
 function quietZones(origin: DOMRect, cell: number): QuietZone[] {
@@ -61,6 +63,7 @@ export function TesseractBackdrop({ paused }: Props) {
 		let image: ImageData | null = null
 		let raf = 0
 		let last = 0
+		let pendingRebuild = 0
 
 		function paint() {
 			if (!scene || !image || !ctx) return
@@ -72,7 +75,7 @@ export function TesseractBackdrop({ paused }: Props) {
 			if (!canvas || !ctx) return
 			const rect = canvas.getBoundingClientRect()
 			const { width, height } = rect
-			const cell = cellSize()
+			const cell = cellSize(width, height)
 			const cols = Math.ceil(width / cell)
 			const rows = Math.ceil(height / cell)
 			if (cols < 2 || rows < 2) return
@@ -90,6 +93,14 @@ export function TesseractBackdrop({ paused }: Props) {
 			if (reduced) settleScene(scene, pointer)
 			else advanceScene(scene, FRAME_MS, pointer)
 			paint()
+		}
+
+		function scheduleRebuild() {
+			if (pendingRebuild) return
+			pendingRebuild = requestAnimationFrame(() => {
+				pendingRebuild = 0
+				rebuild()
+			})
 		}
 
 		function frame(now: number) {
@@ -121,7 +132,7 @@ export function TesseractBackdrop({ paused }: Props) {
 			kickScene(scene)
 		}
 
-		const observer = new ResizeObserver(rebuild)
+		const observer = new ResizeObserver(scheduleRebuild)
 		observer.observe(canvas)
 		for (const el of document.querySelectorAll(QUIET_SELECTOR)) observer.observe(el)
 		rebuild()
@@ -133,6 +144,7 @@ export function TesseractBackdrop({ paused }: Props) {
 		}
 		return () => {
 			cancelAnimationFrame(raf)
+			cancelAnimationFrame(pendingRebuild)
 			observer.disconnect()
 			window.removeEventListener("pointermove", handleMove)
 			document.documentElement.removeEventListener("pointerleave", handleLeave)

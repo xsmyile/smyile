@@ -65,18 +65,18 @@ export function PromptLine({ session, openRef, sissyOut, onOpen }: Props) {
 					onClick={onOpen}
 					aria-label="Open fullscreen terminal"
 					title="Fullscreen (ctrl+k)"
-					className="shrink-0 text-xs whitespace-nowrap text-faint transition-colors hover:text-ink"
+					className="shrink-0 text-xs whitespace-nowrap text-faint transition-colors hover:text-ink pointer-coarse:hidden"
 				>
 					ctrl+k
 				</button>
 			</form>
-			<div className="hidden flex-wrap gap-1.5 pointer-coarse:flex sm:justify-end">
+			<div className="hidden flex-wrap gap-x-4 text-xs pointer-coarse:flex sm:justify-end">
 				{TOUCH_COMMANDS.map((command) => (
 					<button
 						key={command}
 						type="button"
 						onClick={() => run(command)}
-						className="border border-line-strong bg-ground px-2.5 py-2 text-xs text-muted"
+						className="py-2 text-muted underline decoration-faint underline-offset-4"
 					>
 						{command}
 					</button>

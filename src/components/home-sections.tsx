@@ -53,7 +53,7 @@ export function ProjectList() {
 						{STATUS_LABELS[featured.status]}
 					</span>
 				</div>
-				<p className="text-muted">{featured.description}.</p>
+				<p className="text-pretty text-muted">{featured.description}.</p>
 				<ProjectLink project={featured} />
 			</article>
 			{rest.map((project) => (

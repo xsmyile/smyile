@@ -59,6 +59,9 @@ src/
 └── lib/
     ├── tesseract-scene.ts      # Tesseract, corridor and strings rasterized to a dithered buffer
     ├── dither.ts               # Bayer threshold, RGBA writes, CSS color tokens
+    ├── storage.ts              # tryStorage: Web Storage calls that degrade when storage is unavailable
+    ├── url.ts                  # displayHost for showing URLs without scheme
+    ├── motion.ts               # Shared prefers-reduced-motion query
     ├── github-api.ts           # GitHub REST client with localStorage caching (5-min TTL)
     ├── terminal-commands.ts    # CLI command handlers and Tab completion
     ├── sissy-silhouette.ts     # SVG paths from the Sissy app (body + separate eye)

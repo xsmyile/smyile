@@ -1,4 +1,5 @@
 import { GITHUB_USERNAME, SITE_VERSION } from "./constants"
+import { tryStorage } from "./storage"
 
 const BASE_URL = "https://api.github.com"
 const CACHE_TTL = 5 * 60 * 1000
@@ -15,7 +16,7 @@ function prefixedKey(key: string): string {
 }
 
 function purgeStaleVersions() {
-	try {
+	tryStorage(() => {
 		const purgedKey = `${CACHE_PREFIX}purged`
 		if (localStorage.getItem(purgedKey)) return
 		for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -25,32 +26,24 @@ function purgeStaleVersions() {
 			}
 		}
 		localStorage.setItem(purgedKey, "1")
-	} catch {
-		// localStorage unavailable
-	}
+	}, undefined)
 }
 
 purgeStaleVersions()
 
 function readCache<T>(key: string, { allowStale }: { allowStale: boolean }): T | null {
-	try {
+	return tryStorage(() => {
 		const raw = localStorage.getItem(prefixedKey(key))
 		if (!raw) return null
 		const entry: CacheEntry<T> = JSON.parse(raw)
 		if (allowStale || Date.now() - entry.timestamp < CACHE_TTL) return entry.data
 		return null
-	} catch {
-		return null
-	}
+	}, null)
 }
 
 function setCache<T>(key: string, data: T) {
-	try {
-		const entry: CacheEntry<T> = { data, timestamp: Date.now() }
-		localStorage.setItem(prefixedKey(key), JSON.stringify(entry))
-	} catch {
-		// localStorage full or unavailable
-	}
+	const entry: CacheEntry<T> = { data, timestamp: Date.now() }
+	tryStorage(() => localStorage.setItem(prefixedKey(key), JSON.stringify(entry)), undefined)
 }
 
 async function fetchWithCache<T>(
@@ -99,15 +92,6 @@ export type GitHubEvent = {
 	id: string
 	type: string
 	repo: { name: string }
-	created_at: string
-	payload: {
-		action?: string
-		number?: number
-		issue?: { number: number }
-		ref?: string
-		ref_type?: string
-		release?: { tag_name: string }
-	}
 }
 
 export type GitHubRepo = {
@@ -119,10 +103,10 @@ export async function fetchUserProfile() {
 	return fetchWithCache<GitHubUser>(`/users/${GITHUB_USERNAME}`, "gh_user")
 }
 
-export async function fetchUserEvents(page = 1) {
+export async function fetchUserEvents() {
 	return fetchWithCache<GitHubEvent[]>(
-		`/users/${GITHUB_USERNAME}/events/public?per_page=100&page=${page}`,
-		`gh_events_${page}`,
+		`/users/${GITHUB_USERNAME}/events/public?per_page=100`,
+		"gh_events",
 	)
 }
 

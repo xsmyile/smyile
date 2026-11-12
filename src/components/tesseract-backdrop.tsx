@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
 import { readCssColor } from "../lib/dither"
+import { REDUCED_MOTION_QUERY } from "../lib/motion"
 import {
 	advanceScene,
 	createScene,
@@ -20,7 +21,6 @@ const COARSE_CELL_PX = 3
 const COARSE_BREAKPOINT_PX = 700
 const MAX_CELLS = 360_000
 const INK_PROPERTY = "--ink"
-const REDUCED_MOTION = "(prefers-reduced-motion: reduce)"
 const INTERACTIVE = "a, button, input, label, [role='dialog']"
 const QUIET_SELECTOR = "[data-quiet]"
 
@@ -55,7 +55,7 @@ export function TesseractBackdrop({ paused }: Props) {
 		const ctx = canvas?.getContext("2d")
 		if (!canvas || !ctx) return
 
-		const reduced = window.matchMedia(REDUCED_MOTION).matches
+		const reduced = window.matchMedia(REDUCED_MOTION_QUERY).matches
 		const ink = readCssColor(INK_PROPERTY)
 		const pointer: Point = { x: 0, y: 0 }
 		const target: Point = { x: 0, y: 0 }

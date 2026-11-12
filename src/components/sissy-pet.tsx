@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
+import { REDUCED_MOTION_QUERY } from "../lib/motion"
 import {
 	SISSY_BODY_PATH,
 	SISSY_EYE_PATH,
@@ -10,7 +11,6 @@ import {
 const BLINK_MIN_GAP_MS = 3000
 const BLINK_MAX_GAP_MS = 7000
 const EDGE_MARGIN_PX = 8
-const REDUCED_MOTION = "(prefers-reduced-motion: reduce)"
 
 export type PetOrigin = { x: number; y: number }
 
@@ -74,7 +74,7 @@ export function SissyPet({ origin }: Props) {
 	}, [place])
 
 	useEffect(() => {
-		const reduced = window.matchMedia(REDUCED_MOTION)
+		const reduced = window.matchMedia(REDUCED_MOTION_QUERY)
 		let timer: ReturnType<typeof setTimeout> | undefined
 		const schedule = () => {
 			if (reduced.matches) return
@@ -119,7 +119,7 @@ export function SissyPet({ origin }: Props) {
 	return (
 		<div
 			ref={rootRef}
-			className="sissy-pet fixed top-0 left-0 z-60 w-[clamp(72px,8vw,104px)] touch-none select-none"
+			className="fixed top-0 left-0 z-60 w-[clamp(72px,8vw,104px)] touch-none select-none"
 			onAnimationEnd={(e) => {
 				if (e.animationName === "sissy-blink") e.currentTarget.classList.remove("sissy-blink")
 			}}

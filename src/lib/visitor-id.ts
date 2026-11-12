@@ -1,3 +1,7 @@
+import { tryStorage } from "./storage"
+
+const VISITOR_ID_KEY = "smyile_visitor_id"
+
 function hashCode(str: string): number {
 	let hash = 0
 	for (let i = 0; i < str.length; i++) {
@@ -21,19 +25,16 @@ function getFingerprint(): string {
 	return components.join("|")
 }
 
-export function getVisitorId(): string {
-	try {
-		const stored = sessionStorage.getItem("smyile_visitor_id")
-		if (stored) return stored
+function fingerprintId(): string {
+	return hashCode(getFingerprint()).toString(16).toUpperCase().padStart(8, "0").slice(0, 8)
+}
 
-		const fingerprint = getFingerprint()
-		const hash = hashCode(fingerprint)
-		const id = hash.toString(16).toUpperCase().padStart(8, "0").slice(0, 8)
-		sessionStorage.setItem("smyile_visitor_id", id)
+export function getVisitorId(): string {
+	const id = fingerprintId()
+	return tryStorage(() => {
+		const stored = sessionStorage.getItem(VISITOR_ID_KEY)
+		if (stored) return stored
+		sessionStorage.setItem(VISITOR_ID_KEY, id)
 		return id
-	} catch {
-		const fingerprint = getFingerprint()
-		const hash = hashCode(fingerprint)
-		return hash.toString(16).toUpperCase().padStart(8, "0").slice(0, 8)
-	}
+	}, id)
 }
